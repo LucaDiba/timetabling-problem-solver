@@ -1,5 +1,7 @@
 #include <iostream>
-#include <cstring>
+#include <string>
+#include <utility>
+#include <ctime>
 
 struct Solution {
     /* penalty of the solution */
@@ -12,7 +14,16 @@ struct Solution {
     int** exams_timeslot_matrix;
 };
 
-class Problem {
+struct Problem {
+    /* instance name */
+    std::string instance_name;
+
+    /* max time in seconds */
+    int max_time;
+
+    /* timestamp: when the program has started */
+    int start_time;
+
     /* number of exams */
     int n_exams;
 
@@ -35,12 +46,29 @@ class Problem {
 double computePenaltyOfCurrentSolution(Problem* p) {
     return NAN;
 }
-void printSolutionOnFile(Solution sol) {
 
+void printSolutionOnFile(Solution sol) {
 }
 
-int main() {
+bool checkFeasibility(Solution sol) {
+    return false;
+}
 
-    std::cout << "Hello, World!" << std::endl;
+Problem* getProblemFromFile(std::string instance_name, int max_time) {
+    Problem* p = new Problem;
+
+    p->instance_name = std::move(instance_name);
+    p->max_time = max_time;
+    p->start_time = time(NULL);
+
+    // TO-DO: complete
+
+    return p;
+}
+
+int main(int argc, char * argv[]) {
+    std::string instance_name = argv[1];
+    int max_time = atoi(argv[3]);
+    Problem* problem = getProblemFromFile(instance_name, max_time);
     return 0;
 }
