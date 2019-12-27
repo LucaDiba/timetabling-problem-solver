@@ -39,15 +39,28 @@ struct Problem {
     /* [i, j]: number of students enrolled in both exams i and j */
     int** conflicts;
 
-    Solution best_solution;
-    Solution current_solution;
+    Solution* best_solution;
+    Solution* current_solution;
 };
 
-bool checkFeasibility(Solution sol) {
+/**
+ * Check the feasibility of the given solution on the given problem
+ * @param problem
+ * @param solution
+ * @return feasibility (true: feasible, false: unfeasible)
+ */
+bool checkFeasibility(Problem* problem, Solution solution) {
+    // TO-DO:
     return false;
 }
 
-double computePenaltyOfCurrentSolution(Problem* p) {
+/**
+ * Compute the penalty of the given solution on the given problem
+ * @param problem
+ * @param solution
+ * @return penalty
+ */
+double computePenalty(Problem* problem, Solution solution) {
     return NAN;
 }
 

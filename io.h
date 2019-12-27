@@ -1,7 +1,8 @@
 #ifndef IO_CPP
 #define IO_CPP
 
-#include "data_structures.cpp"
+#include <ctime>
+#include "data_structures.h"
 
 /* INPUT */
 
