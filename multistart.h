@@ -9,18 +9,17 @@
 #include <algorithm>  //sort
 #include "GA/Chromosome.h"
 std::vector<Chromosome> chromosomes;
-int populationSize;
-int bestFitness;
-Chromosome* bestChromosome;
-bool acceptWorseSolution = false;
-int topChromosomes = population * 0.2;
+int population_size;
+int best_fitness;
+Chromosome* best_chromosome;
+bool accept_worse_solution = false;
+int top_chromosomes = population * 0.2;
 /**
  * Set the initial solution on the given problem
  * @param problem
  */
 void setInitialSolution(Problem* problem) {
-    // TO-DO:
-    for (int i = 0; i < populationSize; i++) {
+    for (int i = 0; i < population_size; i++) {
       Chromosome* c = new Chromosome(problem->n_timeslots,problem->n_exams);
       c->Mutation();
       chromosomes.push_back(*c);
@@ -37,18 +36,22 @@ void multistart(Problem* problem, int max_multistart_time) {
 
     setInitialSolution(problem);
 
-    // TO-DO: multi-start algorithm
+    while(time(NULL) < stopping_time){
+      SortPopulation();
+      CreateNewPopulation(problem);
+    }
 
+    printf("Best_solution: //TO DO \n Best_fitness %.6f\n",best_fitness );
 }
 
 //Sort the population according to the increasing chromosomes' fitness
 void SortPopulation()
 {
 	std::sort(chromosomes.begin(), chromosomes.end(), [](Chromosome & one, Chromosome & two) {return one.CalculateFitness() > two.CalculateFitness(); });
-	if (chromosomes[0].CalculateFitness()>bestFitness)
+	if (chromosomes[0].CalculateFitness()>best_fitness)
 	{
-		bestFitness = chromosomes[0].CalculateFitness();
-		bestChromosome = chromosomes[0].GetGenes();
+		best_fitness = chromosomes[0].CalculateFitness();
+		best_chromosome = chromosomes[0].GetGenes();
 	}
 }
 
@@ -83,23 +86,22 @@ void CreateNewPopulation(Problem* problem)
 	//Crossover between top Chromosomes
 	for (int j = 0; j < topChromosomes / 2 * 4; j++)
 	{
-		//Choose two random numbers in range [0,topChromosomes)
-		n1 = rand() % (topChromosomes);
-		n2 = rand() % (topChromosomes);
+		//Choose two random numbers in range [0,top_chromosomes)
+		n1 = rand() % (top_chromosomes);
+		n2 = rand() % (top_chromosomes);
 		//Generate new offspring
 		offsping = chromosomes[n1].CrossOver(chromosomes[n2]);
 		c1 = &(offsping.at(0));
 		c2 = &(offsping.at(1));
 		//Add the new children in the population if they are better then the chromosome the will be replaced
-		if (acceptWorseSolution || chromosomes.at(topChromosomes + counter).CalculateFitness() <= c1->CalculateFitness()) {
-			chromosomes.at(topChromosomes + counter) = *c1;
+		if (accept_worse_solution || chromosomes.at(top_chromosomes + counter).CalculateFitness() <= c1->CalculateFitness()) {
+			chromosomes.at(top_chromosomes + counter) = *c1;
 		}
 		counter++;
 
-		if (acceptWorseSolution || chromosomes.at(topChromosomes + counter).CalculateFitness() <= c2->CalculateFitness()){
-			chromosomes.at(topChromosomes + counter) = *c2;
+		if (accept_worse_solution || chromosomes.at(top_chromosomes + counter).CalculateFitness() <= c2->CalculateFitness()){
+			chromosomes.at(top_chromosomes + counter) = *c2;
 		}
-
 		counter++;
 	}
 

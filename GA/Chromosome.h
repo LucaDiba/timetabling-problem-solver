@@ -13,13 +13,15 @@ public:
 
 	void Mutation();
 	std::vector<Chromosome> CrossOver(Chromosome parent2);
+	Chromosome* CrossOverHelper();
 	void Inversion();
 
 	float CalculateFitness();
 
 private:
-	//Found in data_structure.h/Solution
 	int n_timeslots,n_exams;
+	float mutation_rate;
+	//Found in data_structure.h/Solution
 	int** genes;
 	float fitness;
 
