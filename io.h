@@ -1,16 +1,17 @@
 #ifndef IO_CPP
 #define IO_CPP
 
-#include <ctime>
 #include "data_structures.h"
-#include <string>
-#include <iostream>
-#include <cstdlib>
-#include <fstream>
-#include <vector>
 #include <algorithm>
+#include <ctime>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <vector>
 
-/* INPUT */
+
+/*** INPUT ***/
 
 /*  Dynamically allocate memory for a matrix  */
 int** createMatrix(int lines, int columns) {
@@ -28,8 +29,8 @@ int** createMatrix(int lines, int columns) {
 /*  Count the number of lines in a file  */
 int countLines(std::string instance_name){
     bool emptyLine = false;
-	int count = 0;
-	std::ifstream myfile;
+    int count = 0;
+    std::ifstream myfile;
     std::string line;
 
     myfile.open(instance_name, std::ios_base::in);
@@ -119,7 +120,7 @@ int readTimeSlots(std::string instance_name){
 
 /*  Get the number of unique student ids in the Student file  */
 int getNumberOfStudents(int **students, int n_lines_students){
-	std::vector<int> studentIds;
+    std::vector<int> studentIds;
     int i;
 
     /*  Create a new vector of student ids using the std::vector structure, that is easier to handle  */
@@ -172,7 +173,7 @@ int** getExamConflicts(int **student_enrolled, int n_exams, int n_students){
     return conflicts;
 }
 
-
+/*  Main input function  */
 Problem* getProblemFromFile(std::string instance_name, int max_time) {
     Problem* p = new Problem;
 
@@ -200,12 +201,85 @@ Problem* getProblemFromFile(std::string instance_name, int max_time) {
     p->student_enrolled = getStudentEnrolledMatrix(students, p->n_exams, p->n_students, n_lines_students);
     p->conflicts = getExamConflicts(p->student_enrolled, p->n_exams, p->n_students);
 
+    //MOCK
+    p->best_solution = new Solution();
+    p->best_solution->penalty = 100.125;
+    p->best_solution->exams_timeslot = (int*) calloc(139, sizeof(int));
+    for(int i = 0; i < 139; i++){
+        p->best_solution->exams_timeslot[i] = (i % 5) + 1;
+    }
+
     return p;
 }
 
-/* OUTPUT */
-void writeSolutionOnFile(Solution sol) {
 
+/*** OUTPUT ***/
+
+/*  Check if a given file exists, so we can read it  */
+bool isFileExist(std::string fileName)
+{
+    std::ifstream infile(fileName);
+    return infile.good();
+}
+
+/*  Read the file with the best solution penalty accomplished  */
+double readBestSolutionPenalty(std::string instance_name){
+    double bestSolutionPenalty;
+    std::ifstream myfile;
+
+    myfile.open(instance_name, std::ios_base::in);
+
+    if (!myfile)
+        std::cout << "Unable to open file";
+
+    myfile >> bestSolutionPenalty;
+    myfile.close();
+
+    return bestSolutionPenalty;
+}
+
+/*  Write the solution to a file, i.e. the timeslots assigned for each exam  */
+void writeBestSolution(int *exams_timeslot, int n_exams, std::string instance_name_best_solution){
+    std::ofstream myfile;
+
+    myfile.open (instance_name_best_solution);
+    
+    for(int i = 0; i < n_exams; i++){
+
+        /*  Since it is asked to write the exams id exactly as they are given, we complement the ids with leading zeros until we have 4 characters  */
+        myfile << std::setfill('0') << std::setw(4) << i + 1 << " " << exams_timeslot[i] << std::endl;
+    }
+
+    myfile.close();
+}
+
+/*  Write the best solution penalty to a file, so we can compare with future results  */
+void writeBestSolutionPenalty(double penalty, std::string instance_name_best_penalty){
+    std::ofstream myfile;
+
+    myfile.open (instance_name_best_penalty);
+
+    myfile << penalty;
+
+    myfile.close();
+}
+
+/*  Main output function  */
+void writeSolutionOnFile(Problem *p) {
+    std::string instance_name_best_penalty = p->instance_name + "_DMOgroup03.bst";
+    std::string instance_name_best_solution = p->instance_name + "_DMOgroup03.sol";
+
+    double bestSolutionPenalty = -1;
+
+    /*  If another solution was obtained before, read its penalty so we can compare with the actual solution  */
+    if(isFileExist(instance_name_best_penalty))
+        bestSolutionPenalty = readBestSolutionPenalty(instance_name_best_penalty);
+    
+    /*  Write/Overwrite the solution if there was not one before or the current solution is better  */
+    if(bestSolutionPenalty == -1 || p->best_solution->penalty < bestSolutionPenalty){
+        writeBestSolution(p->best_solution->exams_timeslot, p->n_exams, instance_name_best_solution);
+        writeBestSolutionPenalty(p->best_solution->penalty, instance_name_best_penalty);
+    }
 }
 
 #endif //IO_CPP
