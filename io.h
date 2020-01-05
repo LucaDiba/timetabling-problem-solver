@@ -15,12 +15,11 @@
 
 /*  Dynamically allocate memory for a matrix  */
 int** createMatrix(int lines, int columns) {
-    int i;
     int **matrix;
 
     matrix = (int**) calloc(lines, sizeof(int*));
 
-    for (i = 0; i < lines; i++)
+    for (int i = 0; i < lines; i++)
         matrix[i] = (int*) calloc(columns, sizeof(int));
 
     return matrix;
@@ -30,16 +29,16 @@ int** createMatrix(int lines, int columns) {
 int countLines(std::string instance_name){
     bool emptyLine = false;
     int count = 0;
-    std::ifstream myfile;
+    std::ifstream file;
     std::string line;
 
-    myfile.open(instance_name, std::ios_base::in);
+    file.open(instance_name, std::ios_base::in);
 
-    if (!myfile) {
+    if (!file) {
         std::cout << "Unable to open file";
     }
     else {
-        while (getline(myfile, line)){
+        while (getline(file, line)){
             count++;
 
             /*  Verify if the last line of the file is empty  */
@@ -57,18 +56,17 @@ int countLines(std::string instance_name){
 /*  Read the Exams file and return its content as a matrix */
 int **readExams(std::string instance_name, int n_lines_exams){
     int **exams;
-    int i;
-    std::ifstream myfile;
+    std::ifstream file;
 
     exams = createMatrix(n_lines_exams, 2);
 
-    myfile.open(instance_name, std::ios_base::in);
-    if (!myfile) {
+    file.open(instance_name, std::ios_base::in);
+    if (!file) {
         std::cout << "Unable to open file ";
     }
     else {
-        for (i = 0; i < n_lines_exams; i++){
-            myfile >> exams[i][0] >> exams[i][1];
+        for (int i = 0; i < n_lines_exams; i++){
+            file >> exams[i][0] >> exams[i][1];
         }
     }
     
@@ -78,20 +76,20 @@ int **readExams(std::string instance_name, int n_lines_exams){
 /*  Read the Students file and return its content as a matrix */
 int** readStudents(std::string instance_name, int n_lines_students){
     int **students;
-    int i, student_exam;
+    int student_exam;
     std::string student_id;
-    std::ifstream myfile;
+    std::ifstream file;
 
     students = createMatrix(n_lines_students, 2);
 
-    myfile.open(instance_name, std::ios_base::in);
+    file.open(instance_name, std::ios_base::in);
 
-    if (!myfile) {
+    if (!file) {
         std::cout << "Unable to open file";
     }
     else {
-        for (i = 0; i < n_lines_students; i++) {
-            myfile >> student_id >> student_exam;
+        for (int i = 0; i < n_lines_students; i++) {
+            file >> student_id >> student_exam;
 
             /*  Since the student id is a string like 's{id}' we must remove the char 's' before storing the value in the matrix  */
             students[i][0] = std::stoi(student_id.erase(0, 1));
@@ -105,15 +103,15 @@ int** readStudents(std::string instance_name, int n_lines_students){
 /*  Read the Timeslots file and return the number of timeslots  */
 int readTimeSlots(std::string instance_name){
     int timeslots;
-    std::ifstream myfile;
+    std::ifstream file;
 
-    myfile.open(instance_name, std::ios_base::in);
+    file.open(instance_name, std::ios_base::in);
 
-    if (!myfile)
+    if (!file)
         std::cout << "Unable to open file";
 
-    myfile >> timeslots;
-    myfile.close();
+    file >> timeslots;
+    file.close();
 
     return timeslots;
 }
@@ -121,15 +119,15 @@ int readTimeSlots(std::string instance_name){
 /*  Get the number of unique student ids in the Student file  */
 int getNumberOfStudents(int **students, int n_lines_students){
     std::vector<int> studentIds;
-    int i;
+    int uniqueCount;
 
     /*  Create a new vector of student ids using the std::vector structure, that is easier to handle  */
-    for(i = 0; i < n_lines_students; i++)
+    for(int i = 0; i < n_lines_students; i++)
         studentIds.push_back(students[i][0]);
     
     /*  Sort the new vector and then use the std::unique function to get the unique values  */
     std::sort(studentIds.begin(), studentIds.end());
-    int uniqueCount = std::unique(studentIds.begin(), studentIds.end()) - studentIds.begin();
+    uniqueCount = std::unique(studentIds.begin(), studentIds.end()) - studentIds.begin();
 
     return uniqueCount;
 }
@@ -137,10 +135,10 @@ int getNumberOfStudents(int **students, int n_lines_students){
 /*  Create the matrix ixj with students and exams, which returns 1 if student i is enrolled in exam j  */
 int** getStudentEnrolledMatrix(int **students, int n_exams, int n_students, int n_lines_students){
     int **student_enrolled = createMatrix(n_students, n_exams);
-    int i, studentId, exam;
+    int studentId, exam;
 
     /*  For each line (student i enrolled in exam j) in the Students file, sets 1 to the correspondent cell in the matrix  */
-    for (i = 0; i < n_lines_students; i++){
+    for (int i = 0; i < n_lines_students; i++){
         studentId = students[i][0];
         exam = students[i][1];
 
@@ -201,14 +199,6 @@ Problem* getProblemFromFile(std::string instance_name, int max_time) {
     p->student_enrolled = getStudentEnrolledMatrix(students, p->n_exams, p->n_students, n_lines_students);
     p->conflicts = getExamConflicts(p->student_enrolled, p->n_exams, p->n_students);
 
-    //MOCK
-    p->best_solution = new Solution();
-    p->best_solution->penalty = 100.125;
-    p->best_solution->exams_timeslot = (int*) calloc(139, sizeof(int));
-    for(int i = 0; i < 139; i++){
-        p->best_solution->exams_timeslot[i] = (i % 5) + 1;
-    }
-
     return p;
 }
 
@@ -225,43 +215,43 @@ bool isFileExist(std::string fileName)
 /*  Read the file with the best solution penalty accomplished  */
 double readBestSolutionPenalty(std::string instance_name){
     double bestSolutionPenalty;
-    std::ifstream myfile;
+    std::ifstream file;
 
-    myfile.open(instance_name, std::ios_base::in);
+    file.open(instance_name, std::ios_base::in);
 
-    if (!myfile)
+    if (!file)
         std::cout << "Unable to open file";
 
-    myfile >> bestSolutionPenalty;
-    myfile.close();
+    file >> bestSolutionPenalty;
+    file.close();
 
     return bestSolutionPenalty;
 }
 
 /*  Write the solution to a file, i.e. the timeslots assigned for each exam  */
 void writeBestSolution(int *exams_timeslot, int n_exams, std::string instance_name_best_solution){
-    std::ofstream myfile;
+    std::ofstream file;
 
-    myfile.open (instance_name_best_solution);
+    file.open (instance_name_best_solution);
     
     for(int i = 0; i < n_exams; i++){
 
         /*  Since it is asked to write the exams id exactly as they are given, we complement the ids with leading zeros until we have 4 characters  */
-        myfile << std::setfill('0') << std::setw(4) << i + 1 << " " << exams_timeslot[i] << std::endl;
+        file << std::setfill('0') << std::setw(4) << i + 1 << " " << exams_timeslot[i] << std::endl;
     }
 
-    myfile.close();
+    file.close();
 }
 
 /*  Write the best solution penalty to a file, so we can compare with future results  */
 void writeBestSolutionPenalty(double penalty, std::string instance_name_best_penalty){
-    std::ofstream myfile;
+    std::ofstream file;
 
-    myfile.open (instance_name_best_penalty);
+    file.open (instance_name_best_penalty);
 
-    myfile << penalty;
+    file << penalty;
 
-    myfile.close();
+    file.close();
 }
 
 /*  Main output function  */
