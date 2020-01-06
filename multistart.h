@@ -44,7 +44,7 @@ void multistart(Problem* problem, int max_multistart_time) {
     printf("Best_solution: //TO DO \n Best_fitness %.6f\n",best_fitness );
 }
 
-//Sort the population according to the increasing chromosomes' fitness
+//Sort the population according to the decreasing chromosomes' fitness
 void SortPopulation()
 {
 	std::sort(chromosomes.begin(), chromosomes.end(), [](Chromosome & one, Chromosome & two) {return one.CalculateFitness() > two.CalculateFitness(); });
@@ -90,10 +90,10 @@ void CreateNewPopulation(Problem* problem)
 		n1 = rand() % (top_chromosomes);
 		n2 = rand() % (top_chromosomes);
 		//Generate new offspring
-		offsping = chromosomes[n1].CrossOver(chromosomes[n2]);
-		c1 = &(offsping.at(0));
-		c2 = &(offsping.at(1));
-		//Add the new children in the population if they are better then the chromosome the will be replaced
+		offspring = chromosomes[n1].CrossOver(chromosomes[n2]);
+		c1 = &(offspring.at(0));
+		c2 = &(offspring.at(1));
+		//Add the new children in the population if they are better then the chromosome they will replace
 		if (accept_worse_solution || chromosomes.at(top_chromosomes + counter).CalculateFitness() <= c1->CalculateFitness()) {
 			chromosomes.at(top_chromosomes + counter) = *c1;
 		}

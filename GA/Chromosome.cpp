@@ -87,7 +87,7 @@ void Chromosome::Mutation()
 				}
 			}
 			//Set the element at pos index to 1
-			genes[i][index] = 1;
+			solution->exams_timeslot_matrix[i][index] = 1;
 		}
 	}
 }
@@ -104,11 +104,11 @@ vector<Chromosome> Chromosome::CrossOver(Chromosome parent2)
 	int cutMin, cutMax = 0;
 	if (nofCuts == 2)
 	{
-		cutMin = 1 + rand() % (n_timeslots / 2 - 1);
-		cutMax = cutMin + 1 + rand() % (n_timeslots / 2 - 2);
+		cutMin = 1 + rand() % (n_exams / 2 - 1);
+		cutMax = cutMin + 1 + rand() % (n_exams / 2 - 2);
 	}
 	else {
-		cutMin = 1 + rand() % (n_timeslots - 1);
+		cutMin = 1 + rand() % (n_exams - 1);
 	}
 
 	//Child 1
@@ -123,10 +123,11 @@ vector<Chromosome> Chromosome::CrossOver(Chromosome parent2)
 void Chromosome::CrossOverHelper(int** parent1_genes, int** parent2_genes){
 	Chromosome* c = new Chromosome(n_timeslots,n_exams,false);
 
-	for (int r = 0; r < n_exams; r++) {
-		for (int i = cutMin; i < n_timeslots - cutMax; i++)
-			parent1_genes[r][i] = parent2_genes[r][i];
+	for (int i = cutMin; i < n_exams - cutMax; i++){
+		for (int j = 0; j < n_timeslots; j++)
+			parent1_genes[i][j] = parent2_genes[i][j];
 	}
+
 	c->SetGenes(parent1_genes);
 	c->Mutation();
 
@@ -157,10 +158,10 @@ void Chromosome::Inversion()
 	{
 		//Loop for each row
 		for (int r = 0; r < n_exams; r++) {
-			for (int i = 0; i < n_timeslots - (cutMin + cutMax); i++)
-				genes[r][i] = old_genes[r][i + cutMin + cutMax];
-			for (int i = n_timeslots - (cutMin + cutMax); i < n_timeslots; i++)
-				genes[r][i] = old_genes[r][i - (n_timeslots - (cutMin + cutMax))];
+			for (int i = 0; i < n_timeslots - cutMin; i++)
+				genes[r][i] = old_genes[r][i + cutMin];
+			for (int i = n_timeslots - cutMin; i < n_timeslots; i++)
+				genes[r][i] = old_genes[r][i - (n_timeslots - cutMin)];
 		}
 	}
 	else if (nofCuts == 2) {
