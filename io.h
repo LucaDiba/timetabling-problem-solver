@@ -1,7 +1,7 @@
 #ifndef IO_CPP
 #define IO_CPP
 
-#include "data_structures.h"
+#include "data-structures/Solution.h"
 
 /*** INPUT ***/
 

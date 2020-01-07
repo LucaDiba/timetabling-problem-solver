@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "data_structures.h"
-#include "Exam.h"
+#include "data-structures/Solution.h"
+#include "data-structures/Exam.h"
 
 /*  Read the Exams file and return its content as a vector */
 std::vector<Exam*> readExams(std::string examsInstance){

@@ -37,30 +37,4 @@ private:
 
 };
 
-class Problem {
-
-public:
-
-    // Name of the current instance
-    std::string instanceName;
-
-    // Time handling
-    int max_time;
-    int start_time;
-
-    // Exams vector (containing conflicts)
-    std::vector<Exam*> exams;
-
-    // Number of timeslots
-    int timeslots;
-
-    // Number of students
-    int students = 0;
-
-    // Solutions for the current problem
-    Solution* currentSolution;
-    Solution* bestSolution;
-
-};
-
 #endif //DATA_STRUCTURES_CPP

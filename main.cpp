@@ -2,8 +2,8 @@
 #include <string>
 #include <utility>
 
-#include "Exam.h"
-#include "data_structures.h"
+#include "data-structures/Exam.h"
+#include "data-structures/Solution.h"
 #include "io.h"
 
 int main(int argc, char * argv[]) {
