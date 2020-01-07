@@ -2,66 +2,65 @@
 #define DATA_STRUCTURES_CPP
 
 #include <string>
+#include <vector>
+#include <array>
+#include <list>
 
-struct Solution {
-    /* penalty of the solution */
-    double penalty;
+#include "Exam.h"
+
+class Solution {
+
+public:
 
     /* [i]: timeslot assigned to exam i */
-    int* exams_timeslot;
+    std::vector<Exam*> *exams;
+    int timeslots, students;
+    int *examsTimeslots;
+    std::vector<std::vector<int>> timeslotsExams;
 
-    /* [i, j]: 1 if timeslot j is assigned to exam i, 0 otherwise */
-    int** exams_timeslot_matrix;
+    /* Penalty of the solution */
+    double penalty = 0.0;
+    double gain = 0.0;
+
+    /* Solution feasibility */
+    bool isFeasible = true;
+
+    /* Constructor */
+    Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents);
+
+    /* Feasibility checker */
+    bool getFeasibility();
+
+private:
+
+    void computePenalty();
+
 };
 
-struct Problem {
-    /* instance name */
-    std::string instance_name;
+class Problem {
 
-    /* max time in seconds */
+public:
+
+    // Name of the current instance
+    std::string instanceName;
+
+    // Time handling
     int max_time;
-
-    /* timestamp: when the program has started */
     int start_time;
 
-    /* number of exams */
-    int n_exams;
+    // Exams vector (containing conflicts)
+    std::vector<Exam*> exams;
 
-    /* number of students */
-    int n_students;
+    // Number of timeslots
+    int timeslots;
 
-    /* number of timeslots */
-    int n_timeslots;
+    // Number of students
+    int students = 0;
 
-    /* [i, j]: 1 if student i is enrolled in exam j, 0 otherwise */
-    int** student_enrolled;
+    // Solutions for the current problem
+    Solution* currentSolution;
+    Solution* bestSolution;
 
-    /* [i, j]: number of students enrolled in both exams i and j */
-    int** conflicts;
-
-    Solution* best_solution;
-    Solution* current_solution;
 };
-
-/**
- * Check the feasibility of the given solution on the given problem
- * @param problem
- * @param solution
- * @return feasibility (true: feasible, false: unfeasible)
- */
-bool checkFeasibility(Problem* problem, Solution solution) {
-    // TO-DO:
-    return false;
-}
-
-/**
- * Compute the penalty of the given solution on the given problem
- * @param problem
- * @param solution
- * @return penalty
- */
-double computePenalty(Problem* problem, Solution solution) {
-    return NAN;
-}
 
 #endif //DATA_STRUCTURES_CPP
