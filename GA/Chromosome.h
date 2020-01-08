@@ -1,30 +1,36 @@
-#pragma once
 #include <vector>
-class Chromosome
-{
+
+#include "../data-structures/Exam.h"
+#include "../data-structures/Solution.h"
+
+class Chromosome {
+
 public:
-	Chromosome(int n_timeslots,int n_exams, bool initialize = true);
-	~Chromosome();
 
-	void Print();
+    // Constructor
+    Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, bool initialize = true, float mutationRate = 0.1f);
+    Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution, float mutationRate = 0.1f);
 
-	int** GetGenes();
-	void SetGenes(int** genes);
+    // Destructor
+    ~Chromosome();
 
-	void Mutation();
-	std::vector<Chromosome> CrossOver(Chromosome parent2);
-	Chromosome* CrossOverHelper();
-	void Inversion();
-
-	float CalculateFitness();
+    // Genetic operators
+    int *getGenes();
+    void mutation();
+    void inversion();
+    std::vector<Chromosome> crossover(Chromosome *secondParent, bool ordered = false);
+    double getFitness();
 
 private:
-	int n_timeslots,n_exams;
-	float mutation_rate;
-	//Found in data_structure.h/Solution
-	int** genes;
-	float fitness;
 
-	Solution* solution;
+    // Solution object
+    Solution *solution;
+
+    // Mutation rate
+    float mutationRate;
+
+    // Crossover utilities
+    void performStandardCrossover(Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut);
+    void performOrderedCrossover(Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut);
 
 };
