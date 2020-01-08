@@ -2,7 +2,7 @@
 #define MULTISTART_CPP
 
 #include <ctime>
-#include "data_structures.h"
+#include "data-structures/Solution.h"
 
 #include <vector>     //vector
 #include <stdlib.h>   //random
