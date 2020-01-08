@@ -82,7 +82,7 @@ void Solution::initializeRandomSolution() {
 
     for(int i = 0; i < exams->size(); i++)
         // Extract random integer and fill up timeslot sample
-        timeslotSample[i] = distribution(generator);
+        examsTimeslots[i] = distribution(generator);
 
 }
 

@@ -5,7 +5,6 @@
 
 #include "Chromosome.h"
 #include "../data-structures/Solution.h"
-#include "../data-structures/Problem.h"
 
 // The Chromosome class is a solution object(good or bad). A chromosome has a set of genes of type double array of int (size: row->n_exams, columns->n_timeslots).
 // A chromosome can be mutated(one genes is changed);
@@ -67,12 +66,17 @@ std::vector<Chromosome> Chromosome::crossover(Chromosome *secondParent, bool ord
 
     // Children collection
     std::vector<Chromosome> children;
+    int numberOfExams = solution->exams->size();
+
+    // Decide how many cuts will be according with the number of timeslot
+    int minCut = 0, maxCut;
+    int numberOfCuts = (solution->timeslots > 10) ? 2 : 1;
 
     // Random stuff
     std::random_device device;
     std::mt19937 generator(device());
-    std::uniform_int_distribution<int> minCutDistribution(0, solution->exams->size()/2 - 1);
-    std::uniform_int_distribution<int> maxCutDistribution(0, solution->exams->size()/2 - 2);
+    std::uniform_int_distribution<int> minCutDistribution(0, numberOfExams/2 - 1);
+    std::uniform_int_distribution<int> maxCutDistribution(numberOfCuts > 1 ? numberOfExams/2 : 1, numberOfExams - 2);
 
     // Initialize children chromosomes
     Chromosome *firstChild = new Chromosome(
@@ -87,14 +91,10 @@ std::vector<Chromosome> Chromosome::crossover(Chromosome *secondParent, bool ord
             secondParent->solution->students,
             secondParent->getGenes());
 
-    //Decide how many cuts will be according with the number of timeslot
-    int minCut = 0, maxCut;
-    int numberOfCuts = (solution->timeslots > 10) ? 2 : 1;
-
     // Extract
-    maxCut = 1 + maxCutDistribution(generator);
+    maxCut = maxCutDistribution(generator);
     if(numberOfCuts == 2)
-        minCut = 1 + minCutDistribution(generator);
+        minCut = minCutDistribution(generator);
 
     // Perform crossover (choose best alternative)
     if(ordered)
@@ -152,6 +152,8 @@ void Chromosome::performOrderedCrossover(Chromosome *secondParent, Chromosome *f
             // Crossover for the first chromosome
             for(int j = i; ; j = (j + 1) % numberOfExams){
                 if(secondParentUsedGenes.find(j) == secondParentUsedGenes.end()) {
+
+                    printf("%d ", j);
 
                     // Try to set crossover solution
                     firstChildGenes[i] = secondParentGenes[j];
