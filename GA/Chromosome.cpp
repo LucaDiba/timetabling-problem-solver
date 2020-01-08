@@ -5,11 +5,20 @@
 
 #include "Chromosome.h"
 #include "../data-structures/Solution.h"
+#include "../data-structures/Problem.h"
 
 // The Chromosome class is a solution object(good or bad). A chromosome has a set of genes of type double array of int (size: row->n_exams, columns->n_timeslots).
 // A chromosome can be mutated(one genes is changed);
 // Inverted(the genes are divided in parts and these parts are reversed);
 // Two chromosomes can crossover to create two new children(offspring) with genes similar to their parents.
+
+Chromosome::Chromosome(Problem* problem, bool initializeSolution, float rate) {
+    // Initialize new solution with random solution
+    solution = new Solution(&(problem->exams), problem->timeslots, problem->students);
+    mutationRate = rate;
+    if(initializeSolution)
+        solution->initializeRandomSolution();
+}
 
 Chromosome::Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, bool initializeSolution, float rate) {
     // Initialize new solution with random solution
@@ -25,7 +34,6 @@ Chromosome::Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, i
     mutationRate = rate;
 }
 
-//Returns a copy of the current genes
 int *Chromosome::getGenes() {
 
     // Copy current genes
@@ -146,6 +154,7 @@ void performOrderedCrossover(Chromosome *firstParent, Chromosome *secondParent, 
     }
 
     // Perform mutation on children
+    // TODO: execute mutation with probability p(fitness)
     firstChild->mutation();
     secondChild->mutation();
 

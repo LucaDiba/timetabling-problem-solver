@@ -4,7 +4,8 @@
 #include <vector>
 
 #include "Exam.h"
-#include "Problem.h"
+#include "Solution.h"
+
 
 /* Solution class */
 
@@ -52,7 +53,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
         for(int i = 0; i < timeslot.size() && isFeasible; i++){
             for(int j = i; j < timeslot.size() && isFeasible; j++){
                 if((*exams)[timeslot[i]]->hasConflict(timeslot[j])) {
-                    penalty = INT_MAX;
+                    penalty = DBL_MAX;
                     isFeasible = false;
                 }
             }
@@ -104,6 +105,9 @@ void Solution::computePenalty() {
     }
 
     // Store inverse penalty due to maximization problem
-    gain = 1.0/penalty;
-
+    if (penalty == 0) { // avoid dividing by zero
+        gain = DBL_MAX;
+    } else {
+        gain = 1.0 / penalty;
+    }
 }

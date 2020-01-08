@@ -11,11 +11,13 @@
 class Solution {
 
 public:
-
-    /* [i]: timeslot assigned to exam i */
     std::vector<Exam*> *exams;
     int timeslots, students;
+
+    /* [i]: timeslot assigned to exam i */
     int *examsTimeslots;
+
+    /* [i]: list of exams scheduled in timeslot i */
     std::vector<std::vector<int>> timeslotsExams;
 
     /* Penalty of the solution */
@@ -36,6 +38,9 @@ public:
 
 private:
 
+    /**
+     * Compute the penalty and TODO: write it in the best solution file if it is the best
+     */
     void computePenalty();
 
 };
