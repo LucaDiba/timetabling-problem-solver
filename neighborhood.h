@@ -1,7 +1,7 @@
 #ifndef NEIGHBORHOOD_CPP
 #define NEIGHBORHOOD_CPP
 
-#include "data_structures.h"
+#include "data-structures/Solution.h"
 
 /**
  * Get the probability of taking the current solution
