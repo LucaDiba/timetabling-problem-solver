@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "data-structures/Solution.h"
 #include "data-structures/Exam.h"
+#include "data-structures/Problem.h"
 
 /*  Read the Exams file and return its content as a vector */
 std::vector<Exam*> readExams(std::string examsInstance){
@@ -97,6 +97,7 @@ int readTimeslots(std::string timeslotsInstance){
     file.close();
 
     return timeslots;
+
 }
 
 /*  Main input function  */

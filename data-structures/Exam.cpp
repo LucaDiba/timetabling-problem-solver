@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 
 #include "Exam.h"
@@ -35,6 +34,6 @@ void Exam::printAllConflicts(std::vector<Exam*> *exams, bool useIndex) {
     /* Choose index or id and print conflicts */
     printf("Conflicts for exam %d: ", useIndex ? index : id);
     for(auto& conflictingExam : conflicts)
-            printf("%d ", useIndex ? exams->at(conflictingExam.first)->index : exams->at(conflictingExam.first)->id);
+        printf("%d ", useIndex ? exams->at(conflictingExam.first)->index : exams->at(conflictingExam.first)->id);
 
 }

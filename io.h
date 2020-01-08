@@ -1,15 +1,13 @@
 #ifndef IO_CPP
 #define IO_CPP
 
-#include "data-structures/Solution.h"
-
 /*** INPUT ***/
 
 /*  Read the Exams file and return its content as a vector */
 std::vector<Exam*> readExams(std::string examsInstance);
 
 /* Get conflicts from enrolled students */
-void retrieveConflicts(std::string studentsInstance, std::vector<Exam*> exams);
+void retrieveConflicts(std::string studentsInstance, std::vector<Exam*> exams, int *students);
 
 /*  Read the Timeslots file and return the number of timeslots  */
 int readTimeslots(std::string timeslotsInstance);

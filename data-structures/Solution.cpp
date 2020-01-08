@@ -1,4 +1,10 @@
-# include "Solution.h"
+#include <algorithm>
+#include <iterator>
+#include <random>
+#include <vector>
+
+#include "Exam.h"
+#include "Problem.h"
 
 /* Solution class */
 
@@ -10,7 +16,7 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
     students = numberOfStudents;
 
     /* Generate collections for exams/timeslots mapping and vice-versa */
-    examsTimeslots = (int*) malloc(exams->size() * sizeof(int));
+    examsTimeslots = new int[exams->size()];
 
     /* Initialize timeslots/exams vector */
     for(int i = 0; i < timeslots; i++)
@@ -18,10 +24,26 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
 
 }
 
-bool Solution::getFeasibility() {
+Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution){
+
+    /* Store collection length */
+    exams = examsVector;
+    timeslots = numberOfTimeslots;
+    students = numberOfStudents;
+
+    /* Generate collections for exams/timeslots mapping and vice-versa */
+    examsTimeslots = initializingSolution;
+
+    /* Initialize timeslots/exams vector */
+    for(int i = 0; i < timeslots; i++)
+        timeslotsExams.emplace_back(std::vector<int>());
+
+};
+
+bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
 
     /* Populate timeslots/exam vector of lists */
-    for(int i = 0; i < exams->size(); i++)
+    for(int i = start; i < (end > 0 ? end : exams->size()); i++)
         timeslotsExams[examsTimeslots[i]].push_back(i);
 
     /* Check feasibility */
@@ -41,10 +63,33 @@ bool Solution::getFeasibility() {
 
     }
 
-    if(isFeasible)
+    if(isFeasible && evaluatePenalty)
         computePenalty();
 
     return isFeasible;
+
+}
+
+bool Solution::getCutFeasibility(int minCut, int maxCut) {
+
+    // Evaluate only cutting section feasibility
+    return getFeasibility(false, minCut, maxCut);
+
+}
+
+void Solution::initializeRandomSolution() {
+
+    // Initialize exams population
+    int timeslotSample[exams->size()];
+
+    // Initialize randomizer
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::uniform_int_distribution<int> distribution(0, timeslots);
+
+    for(int i = 0; i < exams->size(); i++)
+        // Extract random integer and fill up timeslot sample
+        examsTimeslots[i] = distribution(generator);
 
 }
 
@@ -53,9 +98,8 @@ void Solution::computePenalty() {
     // Compute penalty
     for(int i = 0; i < exams->size(); i++){
         for(int j = i + 1; (j < i + 5) && (j < exams->size()) ; j++){
-            if((*exams)[i]->hasConflict(j)) {
+            if((*exams)[i]->hasConflict(j))
                 penalty += pow(2, (5 - abs(examsTimeslots[j] - examsTimeslots[i]))) * (*exams)[i]->getConflict(j) / students;
-            }
         }
     }
 
@@ -63,4 +107,3 @@ void Solution::computePenalty() {
     gain = 1.0/penalty;
 
 }
-

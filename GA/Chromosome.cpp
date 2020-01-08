@@ -1,196 +1,244 @@
+#include <algorithm>
+#include <iterator>
+#include <random>
+#include <vector>
+
 #include "Chromosome.h"
-#include <iostream>
-#include <stdlib.h>
-#include<ctime>
-#include "data_structures.h"
-using namespace std;
+#include "../data-structures/Solution.h"
 
-//The Chromosome class is a solution object(good or bad). A chromosome has a set of genes of type double array of int (size: row->n_exams, columns->n_timeslots).
-//A chromosome can be mutated(one genes is changed);
-//Inverted(the genes are divided in parts and these parts are reversed);
-//Two chromosomes can crossover to create two new children(offspring) with genes similar to their parents.
+// The Chromosome class is a solution object(good or bad). A chromosome has a set of genes of type double array of int (size: row->n_exams, columns->n_timeslots).
+// A chromosome can be mutated(one genes is changed);
+// Inverted(the genes are divided in parts and these parts are reversed);
+// Two chromosomes can crossover to create two new children(offspring) with genes similar to their parents.
 
-Chromosome::Chromosome(int n_exams,int n_timeslots, bool initialize)
-{
-	n_exams = n_exams;
-	n_timeslots = n_timeslots;
-	mutation_rate = 0.1f;
+Chromosome::Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, bool initializeSolution, float rate) {
+    // Initialize new solution with random solution
+    solution = new Solution(examsVector, numberOfTimeslots, numberOfStudents);
+    mutationRate = rate;
+    if(initializeSolution)
+        solution->initializeRandomSolution();
+}
 
-	//Create space to store variables
-	solution->exams_timeslot = new int[n_timeslots];
-	solution->exams_timeslot_matrix = new int*[n_exams];
-	for (int i = 0; i < n_exams; i++) {
-		solution->exams_timeslot_matrix[i] = new int[n_timeslots];
-	}
-
-	if (initialize)
-	{
-      //Initialize 2d array
-      for (int i = 0; i < n_exams; i++) {
-        for (int j = 0; j < n_timeslots; j++) {
-          //It could be used a better method.
-          //It may happen that an exam is not scheduled(rand() % 100 > 50 always false)
-          if (rand() % 100 > 50) {
-            solution->exams_timeslot_matrix[i][j] = 1;
-            //For feasibility: exit after the exams is scheduled on a time slot
-            j = n_timeslots;
-          }
-        }
-      }
-
-		}
+Chromosome::Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution, float rate) {
+    // Initialize new solution with given solution
+    solution = new Solution(examsVector, numberOfTimeslots, numberOfStudents, initializingSolution);
+    mutationRate = rate;
 }
 
 //Returns a copy of the current genes
-int** Chromosome::GetGenes()
-{
-	int** g = new int*[n_exams];
-	for (int i = 0; i < n_exams; i++) {
-		g[i] = new int[n_timeslots];
-	}
-	for (int i = 0; i < n_exams; i++) {
-		for (int j = 0; j < n_timeslots; j++) {
-			g[i][j] = solution->exams_timeslot_matrix[i][j];
-		}
-	}
-	return g;
+int *Chromosome::getGenes() {
+
+    // Copy current genes
+    int *genesCopy = new int[solution->exams->size()];
+    std::copy(solution->examsTimeslots, solution->examsTimeslots + solution->exams->size(), genesCopy);
+
+    return genesCopy;
+
 }
 
-void Chromosome::SetGenes(int** genes)
-{
-	solution->exams_timeslot_matrix = genes;
+void Chromosome::mutation() {
+
+    // Random stuff
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::uniform_int_distribution<float> probabilityDistribution(0, 100);
+    std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size());
+    std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots);
+
+    // Extract a random rate which must be compared with mutation rate
+    float randomProbability = probabilityDistribution(generator) / 100;
+
+    // Randomly choose to mutate a gene
+    if (randomProbability < mutationRate) {
+
+        // Extract a random exam and a random slot to mutate
+        int mutantExam = examsDistribution(generator);
+        int mutantSlot = timeslotsDistribution(generator);
+
+        // Store new timeslot for the random exam
+        solution->examsTimeslots[mutantExam] = mutantSlot;
+
+    }
+
 }
 
-void Chromosome::Mutation()
-{
-	float r = (rand() % 100) / 100;
+void performStandardCrossover(Chromosome *firstParent, Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut){
 
-	if (r<mutation_rate) {
-		int i = rand() % n_exams;
-		//Comment the for loop to mutate only 1 row of the 2d array
-		//Otherwise it will flip an element in each row
-		for (i = 0; i < n_exams; i++)
-		{
-			//Choose a random number [0,n_timeslots-1]. This will be the index of element to be flipped
-			int index = rand() % n_timeslots;
-			//If the element at position index is already 1 choose another element
-			if (solution->exams_timeslot_matrix[i][index]==1) {
-				int index = rand() % n_timeslots;
-			}
-			//Set to 0 all the elements in the current row
-			for (int j = 0; j < n_timeslots; j++) {
-				if (solution->exams_timeslot_matrix[i][j]==1) {
-					solution->exams_timeslot_matrix[i][j]=0;
-					//Exit after finding the element with 1
-					//since there is only a 1 in each row
-					j=n_timeslots;
-				}
-			}
-			//Set the element at pos index to 1
-			solution->exams_timeslot_matrix[i][index] = 1;
-		}
-	}
+    // Store genes pointer to clean code
+    int *firstParentGenes = firstParent->solution->examsTimeslots;
+    int *secondParentGenes = secondParent->solution->examsTimeslots;
+    int *firstChildGenes = firstChild->solution->examsTimeslots;
+    int *secondChildGenes = secondChild->solution->examsTimeslots;
+
+    // Store exam size to perform better on iteration
+    int numberOfExams = firstParent->solution->exams->size();
+
+    for(int i = 0; i < numberOfExams; i++){
+        if(i < minCut || i > maxCut){
+
+            // Swap timeslots between solutions
+            firstChildGenes[i] = secondParentGenes[i];
+            secondChildGenes[i] = firstParentGenes[i];
+
+        }
+    }
+
+    // Perform mutation on children
+    firstChild->mutation();
+    secondChild->mutation();
+
 }
 
-vector<Chromosome> Chromosome::CrossOver(Chromosome parent2)
-{
-	vector<Chromosome> children;
+void performOrderedCrossover(Chromosome *firstParent, Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut, bool *performingCrossover){
 
-	//Decide how many cuts will be according with the number of timeslot
-	int nofCuts = 1;
-	if (n_timeslots > 10)
-		nofCuts = 2;
+    std::unordered_map<int, bool> firstParentUsedGenes, secondParentUsedGenes;
 
-	int cutMin, cutMax = 0;
-	if (nofCuts == 2)
-	{
-		cutMin = 1 + rand() % (n_exams / 2 - 1);
-		cutMax = cutMin + 1 + rand() % (n_exams / 2 - 2);
-	}
-	else {
-		cutMin = 1 + rand() % (n_exams - 1);
-	}
+    // Store genes pointer to clean code
+    int *firstParentGenes = firstParent->solution->examsTimeslots;
+    int *secondParentGenes = secondParent->solution->examsTimeslots;
+    int *firstChildGenes = firstChild->solution->examsTimeslots;
+    int *secondChildGenes = secondChild->solution->examsTimeslots;
 
-	//Child 1
-	children.push_back( *CrossOverHelper( parent2.GetGenes(),GetGenes() ) );
+    // Store exam size to perform better on iteration
+    int numberOfExams = firstParent->solution->exams->size();
 
-	//Child 2
-	children.push_back( *CrossOverHelper( GetGenes(),parent2.GetGenes() ) );
+    for(int i = maxCut; i < numberOfExams + minCut + 1; i++){
+        if(i % numberOfExams < minCut || i % numberOfExams > maxCut){
 
-	return children;
+            // Crossover for the first chromosome
+            for(int j = i % numberOfExams, k = 0; *performingCrossover; j = (j + 1) % numberOfExams, k++){
+                if(secondParentUsedGenes.find(j) == secondParentUsedGenes.end()) {
+
+                    if(k >= maxCut - minCut + 1) {
+                        *performingCrossover = false;
+                        break;
+                    }
+
+                    // Try to set crossover solution
+                    firstChildGenes[i] = secondParentGenes[j];
+                    if (firstChild->solution->getFeasibility(false)) {
+                        secondParentUsedGenes[j] = true;
+                        break;
+                    }
+
+                }
+            }
+
+            for(int j = i % numberOfExams, k = 0; *performingCrossover; j = (j + 1) % numberOfExams, k++){
+                if(firstParentUsedGenes.find(j) == firstParentUsedGenes.end()) {
+
+                    if(k >= maxCut - minCut + 1) {
+                        *performingCrossover = false;
+                        break;
+                    }
+
+                    // Try to set crossover solution
+                    secondChildGenes[i] = firstParentGenes[j];
+                    if (secondChild->solution->getFeasibility(false)) {
+                        firstParentUsedGenes[j] = true;
+                        break;
+                    }
+
+                }
+            }
+
+        }
+    }
+
+    // Perform mutation on children
+    firstChild->mutation();
+    secondChild->mutation();
+
 }
 
-void Chromosome::CrossOverHelper(int** parent1_genes, int** parent2_genes){
-	Chromosome* c = new Chromosome(n_timeslots,n_exams,false);
+std::vector<Chromosome> Chromosome::crossover(Chromosome *firstParent, Chromosome *secondParent, bool ordered) {
 
-	for (int i = cutMin; i < n_exams - cutMax; i++){
-		for (int j = 0; j < n_timeslots; j++)
-			parent1_genes[i][j] = parent2_genes[i][j];
-	}
+    // Children collection
+    std::vector<Chromosome> children;
+    int numberOfExams = firstParent->solution->exams->size();
 
-	c->SetGenes(parent1_genes);
-	c->Mutation();
+    // Decide how many cuts will be according with the number of timeslot
+    int minCut = 0, maxCut;
+    int numberOfCuts = (firstParent->solution->timeslots > 10) ? 2 : 1;
 
-	return c;
+    // Random stuff
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::uniform_int_distribution<int> minCutDistribution(0, numberOfExams/2 - 1);
+    std::uniform_int_distribution<int> maxCutDistribution(numberOfCuts > 1 ? numberOfExams/2 : 1, numberOfExams - 2);
+
+    // Initialize children chromosomes
+    Chromosome *firstChild = new Chromosome(
+            firstParent->solution->exams,
+            firstParent->solution->timeslots,
+            firstParent->solution->students,
+            firstParent->getGenes());
+
+    Chromosome *secondChild = new Chromosome(
+            secondParent->solution->exams,
+            secondParent->solution->timeslots,
+            secondParent->solution->students,
+            secondParent->getGenes());
+
+    // Extract
+    maxCut = maxCutDistribution(generator);
+    if(numberOfCuts == 2)
+        minCut = minCutDistribution(generator);
+
+    // Initialize flag for ordered crossover
+    bool orderedCrossoverPerformed = true;
+
+    if(ordered && firstParent->solution->getCutFeasibility(minCut, maxCut) && secondParent->solution->getCutFeasibility(minCut, maxCut))
+        performOrderedCrossover(firstParent, secondParent, firstChild, secondChild, minCut, maxCut, &orderedCrossoverPerformed);
+    else
+        performStandardCrossover(firstParent, secondParent, firstChild, secondChild, minCut, maxCut);
+
+    if(!orderedCrossoverPerformed)
+        performStandardCrossover(firstParent, secondParent, firstChild, secondChild, minCut, maxCut);
+
+    children.push_back(*firstChild);
+    children.push_back(*secondChild);
+
+    return children;
+
 }
 
-void Chromosome::Inversion()
-{
-	int nofCuts = 1;
-	if (n_timeslots > 10)
-		nofCuts = 2;
+void Chromosome::inversion() {
 
-	int cutMin, cutMax = 0;
-	if (nofCuts == 2)
-	{
-		cutMin = 1 + rand() % (n_timeslots / 2 - 1);
-		cutMax = cutMin + 1 + rand() % (n_timeslots / 2 - 2);
-	}
-	else {
-		cutMin = 1 + rand() % (n_timeslots - 1);
-	}
+    // Random stuff
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::uniform_int_distribution<int> cutDistribution(0, solution->exams->size()/2 - 1);
 
-	//Copy old genes
-	int** old_genes = GetGenes();
+    //Decide how many cuts will be according with the number of timeslot
+    int cut = cutDistribution(generator);
+    int numberOfExams = solution->exams->size();
 
+    //Copy old genes and store solution pointer
+    Chromosome *invertedChromosome = new Chromosome(
+            solution->exams,
+            solution->timeslots,
+            solution->students,
+            getGenes());
 
-	if (nofCuts == 1)
-	{
-		//Loop for each row
-		for (int r = 0; r < n_exams; r++) {
-			for (int i = 0; i < n_timeslots - cutMin; i++)
-				genes[r][i] = old_genes[r][i + cutMin];
-			for (int i = n_timeslots - cutMin; i < n_timeslots; i++)
-				genes[r][i] = old_genes[r][i - (n_timeslots - cutMin)];
-		}
-	}
-	else if (nofCuts == 2) {
-		for (int r = 0; r < n_exams; r++) {
-			//Elements after cutMax are placed at the beginning of the new genes
-			for (int i = cutMax; i < nofGenes; i++)
-				genes[r][i - cutMax] = old_genes[r][i];
-			//Elements between cutMin and cutMax are not moved
-			for (int i = cutMin; i < cutMax; i++)
-				genes[r][i + nofGenes - cutMax - 2] = old_genes[r][i];
-			//Elements before cutMin are placed at the end of the new genes
-			for (int i = 0; i < cutMin; i++)
-				genes[r][i + nofGenes - cutMin] = old_genes[r][i];
-		}
-	}
+    int *invertedChromosomeGenes = invertedChromosome->solution->examsTimeslots;
 
-	//Free memeory: old genes
-	// delete[] chars;
+    // Swap genes around cutting index
+    for(int i = 0; i < cut; i++)
+        std::swap(invertedChromosomeGenes[i], invertedChromosomeGenes[numberOfExams - 1 - i]);
+
 }
 
 //The fitness is calculated as an integer between 0 and nofGenes
-float Chromosome::CalculateFitness()
-{
-	fitness = 0;
-	//TO DO
-	solution->penalty = fitness;
-	return fitness;
+double Chromosome::getFitness() {
+
+    // Compute feasibility and fitness
+    solution->getFeasibility();
+
+    return solution->gain;
+
 }
 
-Chromosome::~Chromosome()
-{
+Chromosome::~Chromosome() {
+
 }
