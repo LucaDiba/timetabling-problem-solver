@@ -14,23 +14,17 @@ public:
     // Destructor
     ~Chromosome();
 
-    // Genetic operators
-    int *getGenes();
-    void mutation();
-    void inversion();
-    std::vector<Chromosome> crossover(Chromosome *secondParent, bool ordered = false);
-    double getFitness();
-
-private:
-
     // Solution object
     Solution *solution;
 
     // Mutation rate
     float mutationRate;
 
-    // Crossover utilities
-    void performStandardCrossover(Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut);
-    void performOrderedCrossover(Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut, bool *performingCrossover);
+    // Genetic operators
+    int *getGenes();
+    void mutation();
+    static std::vector<Chromosome> crossover(Chromosome *firstParent, Chromosome *secondParent, bool ordered = false);
+    void inversion();
+    double getFitness();
 
 };
