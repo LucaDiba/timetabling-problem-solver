@@ -70,65 +70,16 @@ void Chromosome::mutation() {
 
 }
 
-std::vector<Chromosome> Chromosome::crossover(Chromosome *secondParent, bool ordered) {
-
-    // Children collection
-    std::vector<Chromosome> children;
-    int numberOfExams = solution->exams->size();
-
-    // Decide how many cuts will be according with the number of timeslot
-    int minCut = 0, maxCut;
-    int numberOfCuts = (solution->timeslots > 10) ? 2 : 1;
-
-    // Random stuff
-    std::random_device device;
-    std::mt19937 generator(device());
-    std::uniform_int_distribution<int> minCutDistribution(0, numberOfExams / 2 - 1);
-    std::uniform_int_distribution<int> maxCutDistribution(numberOfCuts > 1 ? numberOfExams / 2 : 1, numberOfExams - 2);
-
-    // Initialize children chromosomes
-    Chromosome *firstChild = new Chromosome(
-            solution->exams,
-            solution->timeslots,
-            solution->students,
-            getGenes());
-
-    Chromosome *secondChild = new Chromosome(
-            secondParent->solution->exams,
-            secondParent->solution->timeslots,
-            secondParent->solution->students,
-            secondParent->getGenes());
-
-    // Extract
-    maxCut = maxCutDistribution(generator);
-    if (numberOfCuts == 2) {
-        minCut = minCutDistribution(generator);
-    }
-
-    // Perform crossover (choose best alternative)
-    if(ordered) {
-        performOrderedCrossover(secondParent, firstChild, secondChild, minCut, maxCut);
-    } else {
-        performStandardCrossover(secondParent, firstChild, secondChild, minCut, maxCut);
-    }
-
-    children.push_back(*firstChild);
-    children.push_back(*secondChild);
-
-    return children;
-
-}
-
-void Chromosome::performStandardCrossover(Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut){
+void performStandardCrossover(Chromosome *firstParent, Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut){
 
     // Store genes pointer to clean code
-    int *firstParentGenes = solution->examsTimeslots;
+    int *firstParentGenes = firstParent->solution->examsTimeslots;
     int *secondParentGenes = secondParent->solution->examsTimeslots;
     int *firstChildGenes = firstChild->solution->examsTimeslots;
     int *secondChildGenes = secondChild->solution->examsTimeslots;
 
     // Store exam size to perform better on iteration
-    int numberOfExams = solution->exams->size();
+    int numberOfExams = firstParent->solution->exams->size();
 
     for(int i = 0; i < numberOfExams; i++){
         if(i < minCut || i > maxCut){
@@ -140,34 +91,39 @@ void Chromosome::performStandardCrossover(Chromosome *secondParent, Chromosome *
         }
     }
 
+    // Perform mutation on children
+    firstChild->mutation();
+    secondChild->mutation();
+
 }
 
-void Chromosome::performOrderedCrossover(Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut){
+void performOrderedCrossover(Chromosome *firstParent, Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut, bool *performingCrossover){
 
-    //int *firstParentGenes = firstParent->GetGenes(), *secondParentGenes = secondParent->GetGenes();
     std::unordered_map<int, bool> firstParentUsedGenes, secondParentUsedGenes;
 
     // Store genes pointer to clean code
-    int *firstParentGenes = solution->examsTimeslots;
+    int *firstParentGenes = firstParent->solution->examsTimeslots;
     int *secondParentGenes = secondParent->solution->examsTimeslots;
     int *firstChildGenes = firstChild->solution->examsTimeslots;
     int *secondChildGenes = secondChild->solution->examsTimeslots;
 
     // Store exam size to perform better on iteration
-    int numberOfExams = solution->exams->size();
+    int numberOfExams = firstParent->solution->exams->size();
 
-    for(int i = maxCut; i < numberOfExams + minCut; i++){
+    for(int i = maxCut; i < numberOfExams + minCut + 1; i++){
         if(i % numberOfExams < minCut || i % numberOfExams > maxCut){
 
             // Crossover for the first chromosome
-            for(int j = i; ; j = (j + 1) % numberOfExams){
+            for(int j = i % numberOfExams, k = 0; *performingCrossover; j = (j + 1) % numberOfExams, k++){
                 if(secondParentUsedGenes.find(j) == secondParentUsedGenes.end()) {
 
-                    printf("%d ", j);
+                    if(k >= maxCut - minCut + 1) {
+                        *performingCrossover = false;
+                        break;
+                    }
 
                     // Try to set crossover solution
                     firstChildGenes[i] = secondParentGenes[j];
-
                     if (firstChild->solution->getFeasibility(false)) {
                         secondParentUsedGenes[j] = true;
                         break;
@@ -176,12 +132,16 @@ void Chromosome::performOrderedCrossover(Chromosome *secondParent, Chromosome *f
                 }
             }
 
-            for(int j = i; ; j = (j + 1) % numberOfExams){
+            for(int j = i % numberOfExams, k = 0; *performingCrossover; j = (j + 1) % numberOfExams, k++){
                 if(firstParentUsedGenes.find(j) == firstParentUsedGenes.end()) {
+
+                    if(k >= maxCut - minCut + 1) {
+                        *performingCrossover = false;
+                        break;
+                    }
 
                     // Try to set crossover solution
                     secondChildGenes[i] = firstParentGenes[j];
-
                     if (secondChild->solution->getFeasibility(false)) {
                         firstParentUsedGenes[j] = true;
                         break;
@@ -197,6 +157,58 @@ void Chromosome::performOrderedCrossover(Chromosome *secondParent, Chromosome *f
     // TODO: execute mutation with probability p(fitness)
     firstChild->mutation();
     secondChild->mutation();
+
+}
+
+std::vector<Chromosome> Chromosome::crossover(Chromosome *firstParent, Chromosome *secondParent, bool ordered) {
+
+    // Children collection
+    std::vector<Chromosome> children;
+    int numberOfExams = firstParent->solution->exams->size();
+
+    // Decide how many cuts will be according with the number of timeslot
+    int minCut = 0, maxCut;
+    int numberOfCuts = (firstParent->solution->timeslots > 10) ? 2 : 1;
+
+    // Random stuff
+    std::random_device device;
+    std::mt19937 generator(device());
+    std::uniform_int_distribution<int> minCutDistribution(0, numberOfExams/2 - 1);
+    std::uniform_int_distribution<int> maxCutDistribution(numberOfCuts > 1 ? numberOfExams/2 : 1, numberOfExams - 2);
+
+    // Initialize children chromosomes
+    Chromosome *firstChild = new Chromosome(
+            firstParent->solution->exams,
+            firstParent->solution->timeslots,
+            firstParent->solution->students,
+            firstParent->getGenes());
+
+    Chromosome *secondChild = new Chromosome(
+            secondParent->solution->exams,
+            secondParent->solution->timeslots,
+            secondParent->solution->students,
+            secondParent->getGenes());
+
+    // Extract
+    maxCut = maxCutDistribution(generator);
+    if(numberOfCuts == 2)
+        minCut = minCutDistribution(generator);
+
+    // Initialize flag for ordered crossover
+    bool orderedCrossoverPerformed = true;
+
+    if(ordered && firstParent->solution->getCutFeasibility(minCut, maxCut) && secondParent->solution->getCutFeasibility(minCut, maxCut))
+        performOrderedCrossover(firstParent, secondParent, firstChild, secondChild, minCut, maxCut, &orderedCrossoverPerformed);
+    else
+        performStandardCrossover(firstParent, secondParent, firstChild, secondChild, minCut, maxCut);
+
+    if(!orderedCrossoverPerformed)
+        performStandardCrossover(firstParent, secondParent, firstChild, secondChild, minCut, maxCut);
+
+    children.push_back(*firstChild);
+    children.push_back(*secondChild);
+
+    return children;
 
 }
 

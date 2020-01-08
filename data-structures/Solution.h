@@ -32,8 +32,12 @@ public:
     Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution);
 
     /* Feasibility checker */
-    bool getFeasibility(bool evaluatePenalty = true);
+    bool getFeasibility(bool evaluatePenalty = true, int start = 0, int end = 0);
+    bool getCutFeasibility(int minCut, int maxCut);
     void initializeRandomSolution();
+
+    /* Feasibility checker */
+    bool getFeasibility();
 
 private:
 

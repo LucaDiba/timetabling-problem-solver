@@ -41,10 +41,10 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
 
 };
 
-bool Solution::getFeasibility(bool evaluatePenalty) {
+bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
 
     /* Populate timeslots/exam vector of lists */
-    for(int i = 0; i < exams->size(); i++)
+    for(int i = start; i < (end > 0 ? end : exams->size()); i++)
         timeslotsExams[examsTimeslots[i]].push_back(i);
 
     /* Check feasibility */
@@ -68,6 +68,13 @@ bool Solution::getFeasibility(bool evaluatePenalty) {
         computePenalty();
 
     return isFeasible;
+
+}
+
+bool Solution::getCutFeasibility(int minCut, int maxCut) {
+
+    // Evaluate only cutting section feasibility
+    return getFeasibility(false, minCut, maxCut);
 
 }
 
