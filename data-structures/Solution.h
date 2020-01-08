@@ -36,9 +36,6 @@ public:
     bool getCutFeasibility(int minCut, int maxCut);
     void initializeRandomSolution();
 
-    /* Feasibility checker */
-    bool getFeasibility();
-
 private:
 
     /**
