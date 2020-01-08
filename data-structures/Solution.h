@@ -37,6 +37,9 @@ public:
 
 private:
 
+    /**
+     * Compute the penalty and TODO: write it in the best solution file if it is the best
+     */
     void computePenalty();
 
 };
