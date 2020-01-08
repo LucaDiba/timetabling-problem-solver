@@ -19,7 +19,7 @@ int main(int argc, char * argv[]) {
     Chromosome *c1 = new Chromosome(&(problem->exams), problem->timeslots, problem->students);
     Chromosome *c2 = new Chromosome(&(problem->exams), problem->timeslots, problem->students);
 
-    c1->crossover(c2, false);
+    c1->crossover(c2, true);
 
     return 0;
 

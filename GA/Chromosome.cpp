@@ -96,10 +96,15 @@ std::vector<Chromosome> Chromosome::crossover(Chromosome *secondParent, bool ord
     if(numberOfCuts == 2)
         minCut = minCutDistribution(generator);
 
-    // Perform crossover (choose best alternative)
-    if(ordered)
-        performOrderedCrossover(secondParent, firstChild, secondChild, minCut, maxCut);
+    // Initialize flag for ordered crossover
+    bool orderedCrossoverPerformed = true;
+
+    if(ordered && solution->getCutFeasibility(minCut, maxCut) && secondParent->solution->getCutFeasibility(minCut, maxCut))
+        performOrderedCrossover(secondParent, firstChild, secondChild, minCut, maxCut, &orderedCrossoverPerformed);
     else
+        performStandardCrossover(secondParent, firstChild, secondChild, minCut, maxCut);
+
+    if(!orderedCrossoverPerformed)
         performStandardCrossover(secondParent, firstChild, secondChild, minCut, maxCut);
 
     children.push_back(*firstChild);
@@ -130,11 +135,14 @@ void Chromosome::performStandardCrossover(Chromosome *secondParent, Chromosome *
         }
     }
 
+    // Perform mutation on children
+    firstChild->mutation();
+    secondChild->mutation();
+
 }
 
-void Chromosome::performOrderedCrossover(Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut){
+void Chromosome::performOrderedCrossover(Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut, bool *performingCrossover){
 
-    //int *firstParentGenes = firstParent->GetGenes(), *secondParentGenes = secondParent->GetGenes();
     std::unordered_map<int, bool> firstParentUsedGenes, secondParentUsedGenes;
 
     // Store genes pointer to clean code
@@ -146,14 +154,17 @@ void Chromosome::performOrderedCrossover(Chromosome *secondParent, Chromosome *f
     // Store exam size to perform better on iteration
     int numberOfExams = solution->exams->size();
 
-    for(int i = maxCut; i < numberOfExams + minCut; i++){
+    for(int i = maxCut; i < numberOfExams + minCut + 1; i++){
         if(i % numberOfExams < minCut || i % numberOfExams > maxCut){
 
             // Crossover for the first chromosome
-            for(int j = i; ; j = (j + 1) % numberOfExams){
+            for(int j = i % numberOfExams, k = 0; *performingCrossover; j = (j + 1) % numberOfExams, k++){
                 if(secondParentUsedGenes.find(j) == secondParentUsedGenes.end()) {
 
-                    printf("%d ", j);
+                    if(k >= maxCut - minCut + 1) {
+                        *performingCrossover = false;
+                        break;
+                    }
 
                     // Try to set crossover solution
                     firstChildGenes[i] = secondParentGenes[j];
@@ -166,8 +177,13 @@ void Chromosome::performOrderedCrossover(Chromosome *secondParent, Chromosome *f
                 }
             }
 
-            for(int j = i; ; j = (j + 1) % numberOfExams){
+            for(int j = i % numberOfExams, k = 0; *performingCrossover; j = (j + 1) % numberOfExams, k++){
                 if(firstParentUsedGenes.find(j) == firstParentUsedGenes.end()) {
+
+                    if(k >= maxCut - minCut + 1) {
+                        *performingCrossover = false;
+                        break;
+                    }
 
                     // Try to set crossover solution
                     secondChildGenes[i] = firstParentGenes[j];
