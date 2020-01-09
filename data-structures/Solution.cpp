@@ -2,6 +2,7 @@
 #include <iterator>
 #include <random>
 #include <vector>
+#include <limits>
 
 #include "Exam.h"
 #include "Solution.h"
@@ -53,7 +54,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
         for(int i = 0; i < timeslot.size() && isFeasible; i++){
             for(int j = i; j < timeslot.size() && isFeasible; j++){
                 if((*exams)[timeslot[i]]->hasConflict(timeslot[j])) {
-                    penalty = DBL_MAX;
+                    penalty = std::numeric_limits<double>::max();
                     isFeasible = false;
                 }
             }
@@ -86,7 +87,7 @@ void Solution::initializeRandomSolution() {
     // Initialize randomizer
     std::random_device device;
     std::mt19937 generator(device());
-    std::uniform_int_distribution<int> distribution(0, timeslots);
+    std::uniform_int_distribution<int> distribution(0, timeslots - 1);
 
     for(int i = 0; i < exams->size(); i++)
         // Extract random integer and fill up timeslot sample
@@ -106,7 +107,7 @@ void Solution::computePenalty() {
 
     // Store inverse penalty due to maximization problem
     if (penalty == 0) { // avoid dividing by zero
-        gain = DBL_MAX;
+        gain = std::numeric_limits<double>::max();
     } else {
         gain = 1.0 / penalty;
     }
