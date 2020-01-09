@@ -29,15 +29,12 @@ public:
      * WARNING: FEASIBILITY NOT GUARANTEED!
      */
     void mutation();
-
     static std::vector<Chromosome> crossover(Chromosome *firstParent, Chromosome *secondParent, bool ordered = false);
 
     /**
      * TODO: documentation - what does this function do?
      */
     void inversion();
-
-    std::vector<Chromosome> crossover(Chromosome *secondParent, bool ordered = false);
     double getFitness();
 
     // Solution object
