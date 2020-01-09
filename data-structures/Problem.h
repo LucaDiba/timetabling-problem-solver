@@ -29,8 +29,11 @@ public:
     int students = 0;
 
     // Solutions for the current problem
-    Solution* currentSolution;
-    Solution* bestSolution;
+    //Solution* currentSolution;
+    Solution* bestSolution = nullptr;
+
+    // Solution handling
+    bool handleNewSolution(Solution *newSolution);
 
 };
 
