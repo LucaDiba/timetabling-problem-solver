@@ -9,9 +9,10 @@ class Chromosome {
 public:
 
     // Constructor
-    explicit Chromosome(Problem* problem, bool initialize = true, float mutationRate = 0.1f);
-    Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, bool initialize = true, float mutationRate = 0.1f);
-    Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution, float mutationRate = 0.1f);
+    explicit Chromosome(Problem* problem, bool initialize = true, bool feasibleSolution = false, float mutationRate = 1);
+    Chromosome(Problem* problem, int *initializingSolution, float mutationRate = 1);
+//    Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, bool initialize = true, float mutationRate = 1);
+//    Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution, float mutationRate = 1);
 
     // Destructor
     ~Chromosome();
@@ -29,12 +30,12 @@ public:
      * WARNING: FEASIBILITY NOT GUARANTEED!
      */
     void mutation();
-    static std::vector<Chromosome*> crossover(Chromosome *firstParent, Chromosome *secondParent, bool ordered = false);
+    static std::vector<Chromosome*> crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent, bool ordered = false);
 
     /**
      * TODO: documentation - what does this function do?
      */
-    Chromosome *inversion();
+    Chromosome *inversion(Problem* problem);
     double getFitness();
 
     // Solution object

@@ -1,3 +1,4 @@
+#include <cmath>
 #include "multistart.h"
 
 int populationSize;
@@ -11,8 +12,17 @@ float populationRatio;
 std::vector<Chromosome*> chromosomes;
 
 void generateInitialPopulation(Problem* problem) {
-    for (int i = 0; i < populationSize; i++)
-        chromosomes.push_back(new Chromosome(problem));
+//    printf("aa");
+//    printf("bb");
+//    printf("%f", chromosomes[0]->getFitness());
+
+    for (int i = 1; i < populationSize; i++) {
+        Chromosome* c = new Chromosome(problem, true, true);
+        chromosomes.push_back(c);
+        c->solution->computePenalty();
+        printf("Penalty: %f\n", c->solution->penalty);
+    }
+//        chromosomes.push_back(new Chromosome(problem));
 }
 
 void sortPopulation(Problem* problem) {
@@ -27,7 +37,7 @@ void sortPopulation(Problem* problem) {
 
 }
 
-void createNewPopulation(Problem* problem) {
+void evolvePopulation(Problem* problem) {
 
     // Sort the population in order to have easy access to the best chromosomes
     sortPopulation(problem);
@@ -49,30 +59,46 @@ void createNewPopulation(Problem* problem) {
             c) 1/4 are generated with Inversion of top Chromosomes
             d) 1/4 are generated as new Chromosomes
     */
+    // TODO: add conditions for population size < 4
+    int b_start = p;
+    int b_stop = p * 2 - 1;
+
+    int c_start = p * 2;
+    int c_stop = p * 3 - 1;
+
+    int d_start = p * 3;
+    int d_stop = populationSize - 1;
 
     // (b) Crossover between top Chromosomes
-    for (int j = p; j < p * 2; j = j + 2) {
-
+    for (int j = b_start; j <= b_stop; j = j + 2) {
         // Generate offspring
         // Otherwise choose two random numbers in range [0,top_chromosomes)
-        offspring = Chromosome::crossover(chromosomes[j - p], chromosomes[j - p + 1]);
+        offspring = Chromosome::crossover(problem, chromosomes[j - p], chromosomes[j - p + 1]);
 
         // Add the new children in the population if they are better then the chromosome they will replace
-        if(offspring[0]->getFitness() > chromosomes[j]->getFitness())
+        if(offspring[0]->getFitness() > chromosomes[j]->getFitness()) {
+            delete chromosomes[j];
             chromosomes[j] = offspring[0];
+        }
 
-        if(offspring[1]->getFitness() > chromosomes[j + 1]->getFitness())
+        if(offspring[1]->getFitness() > chromosomes[j + 1]->getFitness()) {
+            delete chromosomes[j + 1];
             chromosomes[j + 1] = offspring[1];
+        }
 
     }
 
     // (c) Crossover between any Chromosomes
-    for (int j = p * 2; j < p * 3; j++)
-        chromosomes[j] = chromosomes[j - p * 2]->inversion();
+    for (int j = c_start; j <= c_stop; j++) {
+        delete chromosomes[j];
+        chromosomes[j] = chromosomes[j - p * 2]->inversion(problem);
+    }
 
     // (d) Generate new Chromosomes
-    for (int j = p * 3; j < populationSize; j++)
+    for (int j = d_start; j <= d_stop; j++) {
+        delete chromosomes[j];
         chromosomes[j] = new Chromosome(problem);
+    }
 
 }
 
@@ -86,8 +112,7 @@ int computePopulationSize(Problem* problem) {
     // Return population size accordingly to problem size
     if (problemSize > 1000) return int(0.5 * problemSize);
     else if (problemSize > 100) return problemSize;
-
-    return int(1.5 * problemSize);
+    else return int(1.5 * problemSize);
 
 }
 
@@ -103,8 +128,19 @@ void multistart(Problem* problem, int maxTime, float ratio) {
     // Generate initial population
     generateInitialPopulation(problem);
 
+
+//    for (int i=0; i<chromosomes.size(); ++i) {
+//        printf("a");
+//        int* genes = chromosomes[i]->getGenes();
+//        for (int j=0; j<4; j++) {
+//            printf("%d ", genes[j]);
+//        }
+//        printf("\n");
+//    }
+//    return;
+
     while(time(nullptr) < stoppingTime) {
-        createNewPopulation(problem);
+        evolvePopulation(problem);
     }
 
 }

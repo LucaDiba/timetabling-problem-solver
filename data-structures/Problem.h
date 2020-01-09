@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <list>
+#include <random>
 #include "Exam.h"
 #include "Solution.h"
 

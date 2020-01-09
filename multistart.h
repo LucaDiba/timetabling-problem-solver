@@ -22,7 +22,7 @@ void generateInitialPopulation(Problem* problem);
 void sortPopulation(Problem* problem);
 
 //Create a new population using the current population
-void createNewPopulation(Problem* problem);
+void evolvePopulation(Problem* problem);
 
 /** Compute the suggested population size starting from the problem size (number of exams)
  *

@@ -6,11 +6,17 @@ bool Problem::handleNewSolution(Solution *newSolution) {
     // Evaluate solution
     bool isBestSolution = bestSolution == nullptr || newSolution->gain > bestSolution->gain;
 
-    if(bestSolution != nullptr) {
-        for(int i = 0; i < 4; i++)
-            printf("%d ", newSolution->examsTimeslots[i]);
-        printf("\nNew: %f Best: %f \n", newSolution->penalty, bestSolution->penalty);
-    }
+//    if(bestSolution != nullptr) {
+//        for(int i = 0; i < newSolution->exams->size(); i++) {
+//            printf("%d ", newSolution->examsTimeslots[i]);
+//        }
+//        printf("\n");
+////        if(newSolution->isFeasible) {
+////            printf("\nNew: %f Best: %f \n", newSolution->penalty, bestSolution->penalty);
+////        } else {
+////            printf("\nNew: unfeasible");
+////        }
+//    }
 
     if(isBestSolution) {
 

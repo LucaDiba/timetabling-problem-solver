@@ -2,6 +2,9 @@
 #include <string>
 #include <utility>
 
+#include <random>
+std::mt19937 generator;
+
 #include "data-structures/Problem.h"
 #include "io.h"
 #include "multistart.h"

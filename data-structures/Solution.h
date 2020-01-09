@@ -34,9 +34,7 @@ public:
     /* Feasibility checker */
     bool getFeasibility(bool evaluatePenalty = true, int start = 0, int end = 0);
     bool getCutFeasibility(int minCut, int maxCut);
-    void initializeRandomSolution();
-
-private:
+    void initializeRandomSolution(bool feasible = false);
 
     /**
      * Compute the penalty and TODO: write it in the best solution file if it is the best
