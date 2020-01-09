@@ -50,8 +50,8 @@ void Chromosome::mutation() {
     std::random_device device;
     std::mt19937 generator(device());
     std::uniform_int_distribution<float> probabilityDistribution(0, 100);
-    std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size());
-    std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots);
+    std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size() - 1);
+    std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots - 1);
 
     // Extract a random rate which must be compared with mutation rate
     float randomProbability = probabilityDistribution(generator) / 100;
@@ -160,10 +160,10 @@ void performOrderedCrossover(Chromosome *firstParent, Chromosome *secondParent, 
 
 }
 
-std::vector<Chromosome> Chromosome::crossover(Chromosome *firstParent, Chromosome *secondParent, bool ordered) {
+std::vector<Chromosome*> Chromosome::crossover(Chromosome *firstParent, Chromosome *secondParent, bool ordered) {
 
     // Children collection
-    std::vector<Chromosome> children;
+    std::vector<Chromosome*> children;
     int numberOfExams = firstParent->solution->exams->size();
 
     // Decide how many cuts will be according with the number of timeslot
@@ -205,14 +205,14 @@ std::vector<Chromosome> Chromosome::crossover(Chromosome *firstParent, Chromosom
     if(!orderedCrossoverPerformed)
         performStandardCrossover(firstParent, secondParent, firstChild, secondChild, minCut, maxCut);
 
-    children.push_back(*firstChild);
-    children.push_back(*secondChild);
+    children.push_back(firstChild);
+    children.push_back(secondChild);
 
     return children;
 
 }
 
-void Chromosome::inversion() {
+Chromosome *Chromosome::inversion() {
 
     // Random stuff
     std::random_device device;
@@ -235,6 +235,8 @@ void Chromosome::inversion() {
     // Swap genes around cutting index
     for(int i = 0; i < cut; i++)
         std::swap(invertedChromosomeGenes[i], invertedChromosomeGenes[numberOfExams - 1 - i]);
+
+    return invertedChromosome;
 
 }
 
