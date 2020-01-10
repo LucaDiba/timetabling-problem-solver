@@ -4,7 +4,7 @@
 bool Problem::handleNewSolution(Solution *newSolution) {
 
     // Evaluate solution
-    bool isBestSolution = bestSolution == nullptr || newSolution->gain > bestSolution->gain;
+    bool isBestSolution = bestSolution == nullptr || newSolution->getGain() > bestSolution->getGain();
 
 //    if(bestSolution != nullptr) {
 //        for(int i = 0; i < newSolution->exams->size(); i++) {
@@ -27,11 +27,10 @@ bool Problem::handleNewSolution(Solution *newSolution) {
                 newSolution->students,
                 newSolution->examsTimeslots);
 
-        bestSolution->penalty = newSolution->penalty;
-        bestSolution->gain = newSolution->gain;
+        bestSolution->setPenalty(newSolution->getPenalty());
 
         // Notify new best solution
-        printf("New best solution found with penalty: %f \n", bestSolution->penalty);
+        printf("New best solution found with penalty: %f \n", bestSolution->getPenalty());
 
         // Write new solution on file
         writeSolutionOnFile(this);

@@ -17,10 +17,9 @@ void generateInitialPopulation(Problem* problem) {
 //    printf("%f", chromosomes[0]->getFitness());
 
     for (int i = 0; i < populationSize; i++) {
-        Chromosome* c = new Chromosome(problem, true, true);
+        Chromosome* c = new Chromosome(problem);
         chromosomes.push_back(c);
-        c->solution->computePenalty();
-        printf("Penalty: %f\n", c->solution->penalty);
+        printf("Penalty: %f\n", c->solution->getPenalty());
     }
 //        chromosomes.push_back(new Chromosome(problem));
 }
@@ -77,12 +76,12 @@ void evolvePopulation(Problem* problem) {
 
         // Add the new children in the population if they are better then the chromosome they will replace
         if(offspring[0]->getFitness() > chromosomes[j]->getFitness()) {
-//            delete chromosomes[j];
+            delete chromosomes[j];
             chromosomes[j] = offspring[0];
         }
 
         if(offspring[1]->getFitness() > chromosomes[j + 1]->getFitness()) {
-//            delete chromosomes[j + 1];
+            delete chromosomes[j + 1];
             chromosomes[j + 1] = offspring[1];
         }
 
@@ -90,13 +89,13 @@ void evolvePopulation(Problem* problem) {
 
     // (c) Crossover between any Chromosomes
     for (int j = c_start; j <= c_stop; j++) {
-//        delete chromosomes[j];
+        delete chromosomes[j];
         chromosomes[j] = chromosomes[j - p * 2]->inversion(problem);
     }
 
     // (d) Generate new Chromosomes
     for (int j = d_start; j <= d_stop; j++) {
-//        delete chromosomes[j];
+        delete chromosomes[j];
         chromosomes[j] = new Chromosome(problem);
     }
 

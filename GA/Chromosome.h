@@ -8,11 +8,18 @@ class Chromosome {
 
 public:
 
-    // Constructor
-    explicit Chromosome(Problem* problem, bool initialize = true, bool feasibleSolution = false, float mutationRate = 1);
-    Chromosome(Problem* problem, int *initializingSolution, float mutationRate = 1);
-//    Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, bool initialize = true, float mutationRate = 1);
-//    Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution, float mutationRate = 1);
+    /** Chromosome object with a feasible solution initialized
+     * @param problem
+     */
+    explicit Chromosome(Problem* problem);
+
+    /**
+     * Pre-initialized chromosome
+     * @param problem
+     * @param initializingSolution
+     * @param mutationRate
+     */
+    Chromosome(Problem* problem, int *initializingSolution);
 
     // Destructor
     ~Chromosome();
@@ -33,9 +40,10 @@ public:
     static std::vector<Chromosome*> crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent, bool ordered = false);
 
     /**
-     * TODO: documentation - what does this function do?
+     * Swap genes
      */
     Chromosome *inversion(Problem* problem);
+
     double getFitness();
 
     // Solution object

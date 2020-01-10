@@ -8,38 +8,20 @@
 #include "../data-structures/Problem.h"
 #include "../data-structures/rand.h"
 
-// The Chromosome class is a solution object(good or bad). A chromosome has a set of genes of type double array of int (size: row->n_exams, columns->n_timeslots).
-// A chromosome can be mutated(one genes is changed);
-// Inverted(the genes are divided in parts and these parts are reversed);
-// Two chromosomes can crossover to create two new children(offspring) with genes similar to their parents.
+float mutRate = 0.01;
 
-Chromosome::Chromosome(Problem* problem, bool initializeSolution, bool feasibleSolution, float rate) {
-    // Initialize new solution with random solution
+Chromosome::Chromosome(Problem* problem) {
+    mutationRate = mutRate;
+
     solution = new Solution(&(problem->exams), problem->timeslots, problem->students);
-    mutationRate = rate;
-    if(initializeSolution)
-        solution->initializeRandomSolution(feasibleSolution);
+    solution->initializeRandomSolution(true);
 }
 
-Chromosome::Chromosome(Problem* problem, int *initializingSolution, float rate) {
-    // Initialize new solution with random solution
+Chromosome::Chromosome(Problem* problem, int *initializingSolution) {
+    mutationRate = mutRate;
+
     solution = new Solution(&problem->exams, problem->timeslots, problem->students, initializingSolution);
-    mutationRate = rate;
 }
-
-//Chromosome::Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, bool initializeSolution, float rate) {
-//    // Initialize new solution with random solution
-//    solution = new Solution(examsVector, numberOfTimeslots, numberOfStudents);
-//    mutationRate = rate;
-//    if(initializeSolution)
-//        solution->initializeRandomSolution();
-//}
-//
-//Chromosome::Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution, float rate) {
-//    // Initialize new solution with given solution
-//    solution = new Solution(examsVector, numberOfTimeslots, numberOfStudents, initializingSolution);
-//    mutationRate = rate;
-//}
 
 int *Chromosome::getGenes() {
     // Copy current genes
@@ -58,7 +40,7 @@ void Chromosome::mutation() {
     std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots - 1);
 
     // Extract a random rate which must be compared with mutation rate
-    float randomProbability = probabilityDistribution(generator) / 100.0;
+    float randomProbability = float(probabilityDistribution(generator)) / 100.0;
 
     // Randomly choose to mutate a gene
     if (randomProbability < mutationRate) {
@@ -229,14 +211,10 @@ Chromosome *Chromosome::inversion(Problem* problem) {
 
 //The fitness is calculated as an integer between 0 and nofGenes
 double Chromosome::getFitness() {
-    // Compute feasibility and fitness
-//    printf(">> ");
-//    printf("%p \n", this->);
-    solution->getFeasibility();
-    return solution->gain;
-
+    return solution->getGain();
 }
 
 Chromosome::~Chromosome() {
-//    delete solution;
+    delete solution;
+    delete solution;
 }
