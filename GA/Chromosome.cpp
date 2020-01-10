@@ -8,7 +8,7 @@
 #include "../data-structures/Problem.h"
 #include "../data-structures/rand.h"
 
-float mutRate = 0.01;
+float mutRate = 0.5;
 
 Chromosome::Chromosome(Problem* problem) {
     mutationRate = mutRate;
@@ -215,6 +215,5 @@ double Chromosome::getFitness() {
 }
 
 Chromosome::~Chromosome() {
-    delete solution;
     delete solution;
 }

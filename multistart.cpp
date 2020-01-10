@@ -12,16 +12,26 @@ float populationRatio;
 std::vector<Chromosome*> chromosomes;
 
 void generateInitialPopulation(Problem* problem) {
-//    printf("aa");
-//    printf("bb");
-//    printf("%f", chromosomes[0]->getFitness());
+    /* Statistics on generated solutions */ //TODO: remove for production for better performances
+    double tmp_penalty;
+    double min_penalty = std::numeric_limits<double>::max();
+    double max_penalty = std::numeric_limits<double>::min();
+    double sum_penalty = 0;
 
     for (int i = 0; i < populationSize; i++) {
         Chromosome* c = new Chromosome(problem);
         chromosomes.push_back(c);
-        printf("Penalty: %f\n", c->solution->getPenalty());
+
+        tmp_penalty = c->solution->getPenalty();
+        min_penalty = (tmp_penalty < min_penalty) ? tmp_penalty : min_penalty;
+        max_penalty = (tmp_penalty > max_penalty) ? tmp_penalty : max_penalty;
+        sum_penalty += tmp_penalty;
     }
-//        chromosomes.push_back(new Chromosome(problem));
+
+    printf("Random starting solution statistics:\n");
+    printf("- Max penalty:  %f\n", max_penalty);
+    printf("- Min penalty:  %f\n", min_penalty);
+    printf("- Mean penalty: %f\n", sum_penalty / populationSize);
 }
 
 void sortPopulation(Problem* problem) {
@@ -59,6 +69,9 @@ void evolvePopulation(Problem* problem) {
             d) 1/4 are generated as new Chromosomes
     */
     // TODO: add conditions for population size < 4
+    int a_start = 0;
+    int a_stop = p - 1;
+
     int b_start = p;
     int b_stop = p * 2 - 2;
 
@@ -70,6 +83,7 @@ void evolvePopulation(Problem* problem) {
 
     // (b) Crossover between top Chromosomes
     for (int j = b_start; j <= b_stop; j = j + 2) {
+//    for (int j = b_start; j <= c_stop-1; j = j + 2) {
         // Generate offspring
         // Otherwise choose two random numbers in range [0,top_chromosomes)
         offspring = Chromosome::crossover(problem, chromosomes[j - p], chromosomes[j - p + 1]);
@@ -111,8 +125,7 @@ int computePopulationSize(Problem* problem) {
     // Return population size accordingly to problem size
     if (problemSize > 1000) return int(0.5 * problemSize);
     else if (problemSize > 100) return problemSize;
-//    else return int(1.5 * problemSize);
-    return 12; //TODO:debug
+    else return int(1.5 * problemSize);
 }
 
 void multistart(Problem* problem, int maxTime, float ratio) {
