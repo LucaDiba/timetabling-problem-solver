@@ -16,7 +16,7 @@ void generateInitialPopulation(Problem* problem) {
 //    printf("bb");
 //    printf("%f", chromosomes[0]->getFitness());
 
-    for (int i = 1; i < populationSize; i++) {
+    for (int i = 0; i < populationSize; i++) {
         Chromosome* c = new Chromosome(problem, true, true);
         chromosomes.push_back(c);
         c->solution->computePenalty();
@@ -61,7 +61,7 @@ void evolvePopulation(Problem* problem) {
     */
     // TODO: add conditions for population size < 4
     int b_start = p;
-    int b_stop = p * 2 - 1;
+    int b_stop = p * 2 - 2;
 
     int c_start = p * 2;
     int c_stop = p * 3 - 1;
@@ -77,12 +77,12 @@ void evolvePopulation(Problem* problem) {
 
         // Add the new children in the population if they are better then the chromosome they will replace
         if(offspring[0]->getFitness() > chromosomes[j]->getFitness()) {
-            delete chromosomes[j];
+//            delete chromosomes[j];
             chromosomes[j] = offspring[0];
         }
 
         if(offspring[1]->getFitness() > chromosomes[j + 1]->getFitness()) {
-            delete chromosomes[j + 1];
+//            delete chromosomes[j + 1];
             chromosomes[j + 1] = offspring[1];
         }
 
@@ -90,13 +90,13 @@ void evolvePopulation(Problem* problem) {
 
     // (c) Crossover between any Chromosomes
     for (int j = c_start; j <= c_stop; j++) {
-        delete chromosomes[j];
+//        delete chromosomes[j];
         chromosomes[j] = chromosomes[j - p * 2]->inversion(problem);
     }
 
     // (d) Generate new Chromosomes
     for (int j = d_start; j <= d_stop; j++) {
-        delete chromosomes[j];
+//        delete chromosomes[j];
         chromosomes[j] = new Chromosome(problem);
     }
 
@@ -112,8 +112,8 @@ int computePopulationSize(Problem* problem) {
     // Return population size accordingly to problem size
     if (problemSize > 1000) return int(0.5 * problemSize);
     else if (problemSize > 100) return problemSize;
-    else return int(1.5 * problemSize);
-
+//    else return int(1.5 * problemSize);
+    return 12; //TODO:debug
 }
 
 void multistart(Problem* problem, int maxTime, float ratio) {
@@ -139,8 +139,10 @@ void multistart(Problem* problem, int maxTime, float ratio) {
 //    }
 //    return;
 
+    int i=0;
     while(time(nullptr) < stoppingTime) {
         evolvePopulation(problem);
+        i++;
     }
 
 }

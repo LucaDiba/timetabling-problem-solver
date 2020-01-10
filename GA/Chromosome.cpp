@@ -42,7 +42,6 @@ Chromosome::Chromosome(Problem* problem, int *initializingSolution, float rate) 
 //}
 
 int *Chromosome::getGenes() {
-
     // Copy current genes
     int *genesCopy = new int[solution->exams->size()];
     std::copy(solution->examsTimeslots, solution->examsTimeslots + solution->exams->size(), genesCopy);
@@ -230,14 +229,14 @@ Chromosome *Chromosome::inversion(Problem* problem) {
 
 //The fitness is calculated as an integer between 0 and nofGenes
 double Chromosome::getFitness() {
-
     // Compute feasibility and fitness
+//    printf(">> ");
+//    printf("%p \n", this->);
     solution->getFeasibility();
-
     return solution->gain;
 
 }
 
 Chromosome::~Chromosome() {
-    delete solution;
+//    delete solution;
 }

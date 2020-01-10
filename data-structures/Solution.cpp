@@ -43,10 +43,10 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
 };
 
 bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
-
     /* Populate timeslots/exam vector of lists */
     for(int i = start; i < (end > 0 ? end : exams->size()); i++)
         timeslotsExams[examsTimeslots[i]].push_back(i);
+
     /* Check feasibility */
     for(auto& timeslot: timeslotsExams){
 
