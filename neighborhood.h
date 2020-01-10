@@ -2,55 +2,121 @@
 #define NEIGHBORHOOD_CPP
 
 #include "data-structures/Solution.h"
-
-/**
- * Get the probability of taking the current solution
- * @param problem
- * @return probability
- */
-float getProbability(Problem* problem) {
-    return 0.5;
-}
+#include "data-structures/Problem.h"
+#include <math.h> //exp
+#include <random>
+#include <ctime>
 
 /**
  * Starting from a given solution, get another solution in the neighborhood
  *
  * @param current_solution the solution where to start from
- * @param iteration the iteration counter
  * @return the neighbor solution
  */
-Solution getNeighbor(Solution* current_solution, int iteration) {
-    Solution neighbor = *current_solution;
+Solution* getNeighbor(Solution* current_solution) {
+    Solution* neighbor = current_solution;
 
-    // TO-DO: set new neighbor
+    //Execute First Improvement or pick a new random Solution
+    bool found = false, FI = true;
+    while (!found) {
+      Solution* temp = neighbor;
+
+      //Compiute changes:
+      // Random stuff
+      std::random_device device;
+      std::mt19937 generator(device());
+      std::uniform_int_distribution<int> examsDistribution(0, temp->exams->size());
+      std::uniform_int_distribution<int> timeslotsDistribution(0, temp->timeslots);
+
+      // Extract a random exam and a random slot to mutate
+      int mutantExam = examsDistribution(generator);
+      int mutantSlot = timeslotsDistribution(generator);
+
+      // Store new timeslot for the random exam
+      temp->examsTimeslots[mutantExam] = mutantSlot;
+
+      //Check if the new solution is better the the previous one (First Improvement)
+      if(FI){
+        if(temp->computePenalty() > neighbor->computePenalty()){
+          neighbor = temp;
+          found = true;
+        }
+      }
+      //Accept any solution (Random)
+      else{
+        neighbor = temp;
+        found = true;
+      }
+
+    }
 
     return neighbor;
 }
 
-/**
+/*
  * Execute Simulated Annealing algorithm on the given problem
  * @param problem
  */
-void simulatedAnnealing(Problem* problem) {
+void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
+    int starting_time = time(NULL);
+    int stopping_time = starting_time + max_neighborhood_time;
+
     // Initial solution: problem->current_solution
     float rand_probability;
-    float curr_probability;
 
-    for(int i=0; ; ++i) {
+    //T_zero should be a number such that: exp( -(F(x^) - F(x~))/T_zero ) = 0.5
+    //On internet, someone set T to a high number, something like 1000
+    double t_zero = 1000;
+    double T = t_zero;
+    //cooling_rate = [0,1]. Should be near 1, something like 0.99
+    double cooling_rate = 0.99;
+    //(Plateau) Number of iterations after which temperature T can be changed
+    int L = 5;
+
+    Solution* best_solution;
+    //Solution coming from the multistart process
+    Solution* current_solution = problem->bestSolution;
+
+    int steps = 0;
+    while(time(NULL) < stopping_time) {
         rand_probability = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        curr_probability = getProbability(problem);
 
-        Solution temp_solution = getNeighbor(problem->current_solution, i);
+        Solution* temp_solution = getNeighbor(current_solution);
+
+        //Formula used to calucalate probability:
+        // p^ = exp( -(F(x^) - F(x~))/T )
+        //where:
+        //F(x^) is the penalty of the candidate solution(the new one)
+        //F(x~) is the penalty of the current solution
+        //T is the 'cooling temperature'
+        //F(•) is the penalty function (or similar)
+
+        //T should change only after some steps
+        if (steps%L==0) {
+            T = T * cooling_rate;
+        }
+        steps++;
+
+        double prob = exp( -(temp_solution->computePenalty() - current_solution->computePenalty())/T );
+        if(prob > rand_probability){
+            current_solution = temp_solution;
+            //Update best solution if the new solution has an higher score
+            if(current_solution->computePenalty() < best_solution->computePenalty())
+                best_solution = current_solution;
+        }
 
     }
+
+    //Loop end. Update Solution variable with the best solution found
+    problem->handleNewSolution(best_solution);
 }
 
 /**
  * Execute a neighborhood algorithm on the given problem
  * @param problem
  */
-void neighborhood(Problem* problem) {
-    simulatedAnnealing(problem);
+void neighborhood(Problem* problem, int max_neighborhood_time) {
+    simulatedAnnealing(problem, max_neighborhood_time);
 }
 
 #endif //NEIGHBORHOOD_CPP
