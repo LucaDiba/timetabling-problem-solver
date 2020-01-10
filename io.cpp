@@ -114,80 +114,22 @@ Problem* getProblemFromFile(std::string instance_name, int max_time) {
     p->timeslots = readTimeslots(p->instanceName + ".slo");
     retrieveConflicts(p->instanceName + ".stu", p->exams, &p->students);
 
-    // Declare solutions
-    p->bestSolution = new Solution(&(p->exams), p->timeslots, p->students);
-    p->currentSolution = new Solution(&(p->exams), p->timeslots, p->students);
-
     return p;
 
 }
 
 /*** OUTPUT ***/
 
-/*  Check if a given file exists, so we can read it  */
-bool isFileExist(std::string fileName)
-{
-    std::ifstream infile(fileName);
-    return infile.good();
-}
-
-/*  Read the file with the best solution penalty accomplished  */
-double readBestSolutionPenalty(std::string instance_name){
-    double bestSolutionPenalty;
-    std::ifstream file;
-
-    file.open(instance_name, std::ios_base::in);
-
-    if (!file)
-        std::cout << "Unable to open file";
-
-    file >> bestSolutionPenalty;
-    file.close();
-
-    return bestSolutionPenalty;
-}
-
-/*  Write the solution to a file, i.e. the timeslots assigned for each exam  */
-void writeBestSolution(int *exams_timeslot, int n_exams, std::string instance_name_best_solution){
-    std::ofstream file;
-
-    file.open (instance_name_best_solution);
-
-    for(int i = 0; i < n_exams; i++){
-
-        /*  Since it is asked to write the exams id exactly as they are given, we complement the ids with leading zeros until we have 4 characters  */
-        file << std::setfill('0') << std::setw(4) << i + 1 << " " << exams_timeslot[i] << std::endl;
-    }
-
-    file.close();
-}
-
-/*  Write the best solution penalty to a file, so we can compare with future results  */
-void writeBestSolutionPenalty(double penalty, std::string instance_name_best_penalty){
+/*  Main output function  */
+void writeSolutionOnFile(Problem *p) {
 
     // File IO
     std::ofstream file;
-    file.open (instance_name_best_penalty);
+    file.open(p->instanceName + "_DMOgroup03.sol");
 
-    file << penalty;
+    for(int i = 0; i < p->bestSolution->exams->size(); i++)
+        file << p->bestSolution->exams->at(i)->id << " " << p->bestSolution->examsTimeslots[i] << "\n";
+
     file.close();
 
-}
-
-/*  Main output function  */
-void writeSolutionOnFile(Problem *p) {
-    std::string instance_name_best_penalty = p->instanceName + "_DMOgroup03.bst";
-    std::string instance_name_best_solution = p->instanceName + "_DMOgroup03.sol";
-
-    double bestSolutionPenalty = -1;
-
-    /*  If another solution was obtained before, read its penalty so we can compare with the actual solution  */
-    if(isFileExist(instance_name_best_penalty))
-        bestSolutionPenalty = readBestSolutionPenalty(instance_name_best_penalty);
-
-    /*  Write/Overwrite the solution if there was not one before or the current solution is better  */
-    if(bestSolutionPenalty == -1 || p->bestSolution->penalty < bestSolutionPenalty){
-        writeBestSolution(p->bestSolution->examsTimeslots, p->exams.size(), instance_name_best_solution);
-        writeBestSolutionPenalty(p->bestSolution->penalty, instance_name_best_penalty);
-    }
 }

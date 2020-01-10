@@ -20,10 +20,6 @@ public:
     /* [i]: list of exams scheduled in timeslot i */
     std::vector<std::vector<int>> timeslotsExams;
 
-    /* Penalty of the solution */
-    double penalty = 0.0;
-    double gain = 0.0;
-
     /* Solution feasibility */
     bool isFeasible = true;
 
@@ -34,14 +30,21 @@ public:
     /* Feasibility checker */
     bool getFeasibility(bool evaluatePenalty = true, int start = 0, int end = 0);
     bool getCutFeasibility(int minCut, int maxCut);
-    void initializeRandomSolution();
+    void initializeRandomSolution(bool feasible = false);
 
-private:
+    double getPenalty();
+    double getGain();
+    void setPenalty(double new_penalty);
 
     /**
      * Compute the penalty and TODO: write it in the best solution file if it is the best
      */
-    void computePenalty();
+    double computePenalty();
+
+private:
+    /* Penalty of the solution */
+    bool computed_penalty = false;
+    double penalty = 0.0;
 
 };
 

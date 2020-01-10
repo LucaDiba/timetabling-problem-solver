@@ -6,36 +6,24 @@
 #include "Chromosome.h"
 #include "../data-structures/Solution.h"
 #include "../data-structures/Problem.h"
+#include "../data-structures/rand.h"
 
-// The Chromosome class is a solution object(good or bad). A chromosome has a set of genes of type double array of int (size: row->n_exams, columns->n_timeslots).
-// A chromosome can be mutated(one genes is changed);
-// Inverted(the genes are divided in parts and these parts are reversed);
-// Two chromosomes can crossover to create two new children(offspring) with genes similar to their parents.
+float mutRate = 0.01;
 
-Chromosome::Chromosome(Problem* problem, bool initializeSolution, float rate) {
-    // Initialize new solution with random solution
+Chromosome::Chromosome(Problem* problem) {
+    mutationRate = mutRate;
+
     solution = new Solution(&(problem->exams), problem->timeslots, problem->students);
-    mutationRate = rate;
-    if(initializeSolution)
-        solution->initializeRandomSolution();
+    solution->initializeRandomSolution(true);
 }
 
-Chromosome::Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, bool initializeSolution, float rate) {
-    // Initialize new solution with random solution
-    solution = new Solution(examsVector, numberOfTimeslots, numberOfStudents);
-    mutationRate = rate;
-    if(initializeSolution)
-        solution->initializeRandomSolution();
-}
+Chromosome::Chromosome(Problem* problem, int *initializingSolution) {
+    mutationRate = mutRate;
 
-Chromosome::Chromosome(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution, float rate) {
-    // Initialize new solution with given solution
-    solution = new Solution(examsVector, numberOfTimeslots, numberOfStudents, initializingSolution);
-    mutationRate = rate;
+    solution = new Solution(&problem->exams, problem->timeslots, problem->students, initializingSolution);
 }
 
 int *Chromosome::getGenes() {
-
     // Copy current genes
     int *genesCopy = new int[solution->exams->size()];
     std::copy(solution->examsTimeslots, solution->examsTimeslots + solution->exams->size(), genesCopy);
@@ -47,14 +35,12 @@ int *Chromosome::getGenes() {
 void Chromosome::mutation() {
 
     // Random stuff
-    std::random_device device;
-    std::mt19937 generator(device());
-    std::uniform_int_distribution<float> probabilityDistribution(0, 100);
-    std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size());
-    std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots);
+    std::uniform_int_distribution<int> probabilityDistribution(0, 100);
+    std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size() - 1);
+    std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots - 1);
 
     // Extract a random rate which must be compared with mutation rate
-    float randomProbability = probabilityDistribution(generator) / 100;
+    float randomProbability = float(probabilityDistribution(generator)) / 100.0;
 
     // Randomly choose to mutate a gene
     if (randomProbability < mutationRate) {
@@ -160,10 +146,10 @@ void performOrderedCrossover(Chromosome *firstParent, Chromosome *secondParent, 
 
 }
 
-std::vector<Chromosome> Chromosome::crossover(Chromosome *firstParent, Chromosome *secondParent, bool ordered) {
+std::vector<Chromosome*> Chromosome::crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent, bool ordered) {
 
     // Children collection
-    std::vector<Chromosome> children;
+    std::vector<Chromosome*> children;
     int numberOfExams = firstParent->solution->exams->size();
 
     // Decide how many cuts will be according with the number of timeslot
@@ -171,23 +157,12 @@ std::vector<Chromosome> Chromosome::crossover(Chromosome *firstParent, Chromosom
     int numberOfCuts = (firstParent->solution->timeslots > 10) ? 2 : 1;
 
     // Random stuff
-    std::random_device device;
-    std::mt19937 generator(device());
     std::uniform_int_distribution<int> minCutDistribution(0, numberOfExams/2 - 1);
     std::uniform_int_distribution<int> maxCutDistribution(numberOfCuts > 1 ? numberOfExams/2 : 1, numberOfExams - 2);
 
     // Initialize children chromosomes
-    Chromosome *firstChild = new Chromosome(
-            firstParent->solution->exams,
-            firstParent->solution->timeslots,
-            firstParent->solution->students,
-            firstParent->getGenes());
-
-    Chromosome *secondChild = new Chromosome(
-            secondParent->solution->exams,
-            secondParent->solution->timeslots,
-            secondParent->solution->students,
-            secondParent->getGenes());
+    Chromosome *firstChild = new Chromosome(problem, (int*) firstParent->getGenes());
+    Chromosome *secondChild = new Chromosome(problem, (int*) secondParent->getGenes());
 
     // Extract
     maxCut = maxCutDistribution(generator);
@@ -205,18 +180,16 @@ std::vector<Chromosome> Chromosome::crossover(Chromosome *firstParent, Chromosom
     if(!orderedCrossoverPerformed)
         performStandardCrossover(firstParent, secondParent, firstChild, secondChild, minCut, maxCut);
 
-    children.push_back(*firstChild);
-    children.push_back(*secondChild);
+    children.push_back(firstChild);
+    children.push_back(secondChild);
 
     return children;
 
 }
 
-void Chromosome::inversion() {
+Chromosome *Chromosome::inversion(Problem* problem) {
 
     // Random stuff
-    std::random_device device;
-    std::mt19937 generator(device());
     std::uniform_int_distribution<int> cutDistribution(0, solution->exams->size()/2 - 1);
 
     //Decide how many cuts will be according with the number of timeslot
@@ -224,11 +197,7 @@ void Chromosome::inversion() {
     int numberOfExams = solution->exams->size();
 
     //Copy old genes and store solution pointer
-    Chromosome *invertedChromosome = new Chromosome(
-            solution->exams,
-            solution->timeslots,
-            solution->students,
-            getGenes());
+    Chromosome *invertedChromosome = new Chromosome(problem, (int*) getGenes());
 
     int *invertedChromosomeGenes = invertedChromosome->solution->examsTimeslots;
 
@@ -236,18 +205,16 @@ void Chromosome::inversion() {
     for(int i = 0; i < cut; i++)
         std::swap(invertedChromosomeGenes[i], invertedChromosomeGenes[numberOfExams - 1 - i]);
 
+    return invertedChromosome;
+
 }
 
 //The fitness is calculated as an integer between 0 and nofGenes
 double Chromosome::getFitness() {
-
-    // Compute feasibility and fitness
-    solution->getFeasibility();
-
-    return solution->gain;
-
+    return solution->getGain();
 }
 
 Chromosome::~Chromosome() {
-
+    delete solution;
+    delete solution;
 }

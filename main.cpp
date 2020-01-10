@@ -2,6 +2,9 @@
 #include <string>
 #include <utility>
 
+#include <random>
+std::mt19937 generator;
+
 #include "data-structures/Problem.h"
 #include "io.h"
 #include "multistart.h"
@@ -14,7 +17,7 @@ int main(int argc, char * argv[]) {
     int max_multistart_time = int(max_time * 0.6);
 
     Problem *problem = getProblemFromFile(instance_name, max_time);
-
+    printf("a");
     multistart(problem, max_multistart_time);
     // TODO: neighborhood(problem);
 
