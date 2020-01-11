@@ -1,6 +1,6 @@
 #include <cmath>
 #include "multistart.h"
-#include "data-structures/rand.h"
+#include "../data-structures/rand.h"
 
 int populationSize;
 

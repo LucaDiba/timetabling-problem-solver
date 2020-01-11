@@ -3,9 +3,9 @@
 #include <vector>
 
 #include "Chromosome.h"
-#include "../data-structures/Solution.h"
-#include "../data-structures/Problem.h"
-#include "../data-structures/rand.h"
+#include "../../data-structures/Solution.h"
+#include "../../data-structures/Problem.h"
+#include "../../data-structures/rand.h"
 
 float mutRate = 0.8;
 

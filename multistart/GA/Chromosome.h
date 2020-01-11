@@ -1,8 +1,8 @@
 #include <vector>
 
-#include "../data-structures/Exam.h"
-#include "../data-structures/Solution.h"
-#include "../data-structures/Problem.h"
+#include "../../data-structures/Exam.h"
+#include "../../data-structures/Solution.h"
+#include "../../data-structures/Problem.h"
 
 class Chromosome {
 

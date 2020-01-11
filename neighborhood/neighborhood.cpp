@@ -1,62 +1,49 @@
-#ifndef NEIGHBORHOOD_CPP
-#define NEIGHBORHOOD_CPP
+#include "neighborhood.h"
 
-#include "data-structures/Solution.h"
-#include "data-structures/Problem.h"
-#include <math.h> //exp
-#include <random>
-#include <ctime>
+void neighborhood(Problem* problem, int max_neighborhood_time) {
+simulatedAnnealing(problem, max_neighborhood_time);
+}
 
-/**
- * Starting from a given solution, get another solution in the neighborhood
- *
- * @param current_solution the solution where to start from
- * @return the neighbor solution
- */
 Solution* getNeighbor(Solution* current_solution) {
     Solution* neighbor = current_solution;
 
     //Execute First Improvement or pick a new random Solution
     bool found = false, FI = true;
     while (!found) {
-      Solution* temp = neighbor;
+        Solution* temp = neighbor;
 
-      //Compiute changes:
-      // Random stuff
-      std::random_device device;
-      std::mt19937 generator(device());
-      std::uniform_int_distribution<int> examsDistribution(0, temp->exams->size());
-      std::uniform_int_distribution<int> timeslotsDistribution(0, temp->timeslots);
+        //Compiute changes:
+        // Random stuff
+        std::random_device device;
+        std::mt19937 generator(device());
+        std::uniform_int_distribution<int> examsDistribution(0, temp->exams->size());
+        std::uniform_int_distribution<int> timeslotsDistribution(0, temp->timeslots);
 
-      // Extract a random exam and a random slot to mutate
-      int mutantExam = examsDistribution(generator);
-      int mutantSlot = timeslotsDistribution(generator);
+        // Extract a random exam and a random slot to mutate
+        int mutantExam = examsDistribution(generator);
+        int mutantSlot = timeslotsDistribution(generator);
 
-      // Store new timeslot for the random exam
-      temp->examsTimeslots[mutantExam] = mutantSlot;
+        // Store new timeslot for the random exam
+        temp->examsTimeslots[mutantExam] = mutantSlot;
 
-      //Check if the new solution is better the the previous one (First Improvement)
-      if(FI){
-        if(temp->getPenalty() > neighbor->getPenalty()){
-          neighbor = temp;
-          found = true;
+        //Check if the new solution is better the the previous one (First Improvement)
+        if(FI){
+            if(temp->getPenalty() > neighbor->getPenalty()){
+                neighbor = temp;
+                found = true;
+            }
         }
-      }
-      //Accept any solution (Random)
-      else{
-        neighbor = temp;
-        found = true;
-      }
+            //Accept any solution (Random)
+        else{
+            neighbor = temp;
+            found = true;
+        }
 
     }
 
     return neighbor;
 }
 
-/*
- * Execute Simulated Annealing algorithm on the given problem
- * @param problem
- */
 void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
     // Initial solution: problem->current_solution
     float rand_probability;
@@ -105,13 +92,3 @@ void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
     }
 
 }
-
-/**
- * Execute a neighborhood algorithm on the given problem
- * @param problem
- */
-void neighborhood(Problem* problem, int max_neighborhood_time) {
-    simulatedAnnealing(problem, max_neighborhood_time);
-}
-
-#endif //NEIGHBORHOOD_CPP

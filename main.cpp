@@ -6,9 +6,9 @@
 std::mt19937 generator;
 
 #include "data-structures/Problem.h"
-#include "io.h"
-#include "multistart.h"
-#include "neighborhood.h"
+#include "io/io.h"
+#include "multistart/multistart.h"
+#include "neighborhood/neighborhood.h"
 
 int main(int argc, char * argv[]) {
 

@@ -1,5 +1,5 @@
 #include "Problem.h"
-#include "../io.h"
+#include "../io/io.h"
 
 bool Problem::handleNewSolution(Solution *newSolution) {
 

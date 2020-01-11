@@ -3,14 +3,14 @@
 
 #include <ctime>
 #include <vector>
-#include <stdlib.h>
+#include <cstdlib>
 #include <algorithm>
 
-#include "GA/Chromosome.h"
-#include "data-structures/Solution.h"
-#include "data-structures/Exam.h"
-#include "data-structures/Solution.h"
-#include "data-structures/Problem.h"
+#include "./GA/Chromosome.h"
+#include "../data-structures/Solution.h"
+#include "../data-structures/Exam.h"
+#include "../data-structures/Solution.h"
+#include "../data-structures/Problem.h"
 
 /**
  * Set an initial random population

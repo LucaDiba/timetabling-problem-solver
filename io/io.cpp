@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "data-structures/Exam.h"
-#include "data-structures/Problem.h"
+#include "../data-structures/Exam.h"
+#include "../data-structures/Problem.h"
 
 /*  Read the Exams file and return its content as a vector */
 std::vector<Exam*> readExams(std::string examsInstance){
@@ -37,7 +37,7 @@ std::vector<Exam*> readExams(std::string examsInstance){
 }
 
 /* Get conflicts from enrolled students */
-void retrieveConflicts(std::string studentsInstance, std::vector<Exam*> exams, int *students) {
+void retrieveConflicts(std::string& studentsInstance, std::vector<Exam*> exams, int *students) {
 
     // File IO
     std::ifstream file;
@@ -104,11 +104,11 @@ int readTimeslots(std::string timeslotsInstance){
 /*  Main input function  */
 Problem* getProblemFromFile(std::string instance_name, int max_time) {
 
-    Problem* p = new Problem;
+    auto* p = new Problem;
 
     p->instanceName = std::move(instance_name);
     p->max_time = max_time;
-    p->start_time = time(NULL);
+    p->start_time = time(nullptr);
 
     // Read the files
     p->exams = readExams(p->instanceName + ".exm");
