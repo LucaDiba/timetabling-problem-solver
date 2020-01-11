@@ -161,7 +161,7 @@ int computePopulationSize(Problem* problem) {
     else return std::max(5, int(1.5 * problemSize));
 }
 
-void multistart(Problem* problem, int maxTime, float populationRatio) {
+void multistart(Problem* problem, int maxTime) {
 
     int startingTime = time(nullptr);
     int stoppingTime = startingTime + maxTime;
