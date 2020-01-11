@@ -17,7 +17,7 @@ void generateInitialPopulation(Problem* problem) {
 
     for (int i = 0; i < populationSize; i++) {
 
-        Chromosome* c = new Chromosome(problem, false);
+        Chromosome* c = new Chromosome(problem, true);
         chromosomes.push_back(c);
 
         tmp_penalty = c->solution->getPenalty();
