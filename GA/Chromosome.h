@@ -11,7 +11,7 @@ public:
     /** Chromosome object with a feasible solution initialized
      * @param problem
      */
-    explicit Chromosome(Problem* problem);
+    explicit Chromosome(Problem* problem, bool improved_solution = false);
 
     /**
      * Pre-initialized chromosome

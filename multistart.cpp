@@ -4,10 +4,6 @@
 
 int populationSize;
 
-//double best_fitness;
-//Chromosome* best_chromosome;
-//bool accept_worse_solution = false;
-
 // Population vector
 std::vector<Chromosome*> chromosomes;
 
@@ -21,7 +17,7 @@ void generateInitialPopulation(Problem* problem) {
 
     for (int i = 0; i < populationSize; i++) {
 
-        Chromosome* c = new Chromosome(problem);
+        Chromosome* c = new Chromosome(problem, true);
         chromosomes.push_back(c);
 
         tmp_penalty = c->solution->getPenalty();
@@ -56,7 +52,7 @@ void evolvePopulation(Problem* problem) {
 
     // Initialize some variables
     std::vector<Chromosome*> offspring;
-    std::vector<Chromosome*> previous_generation_chromosomes;
+    std::vector<Chromosome*> previous_generation_chromosomes = chromosomes;
 
     // There are different ways to generate a new population:
     // At the beginning you should use crossover a lot,
@@ -96,30 +92,17 @@ void evolvePopulation(Problem* problem) {
 
         int random_parent_1_id = population_distribution(generator);
         int random_parent_2_id = population_distribution(generator);
-        Chromosome* random_parent_1;
-        Chromosome* random_parent_2;
-
-        if(random_parent_1_id >= a_stop && random_parent_1_id < j) {
-            random_parent_1 = previous_generation_chromosomes[random_parent_1_id - a_stop];
-        } else {
-            random_parent_1 = chromosomes[random_parent_1_id];
-        }
-        if(random_parent_2_id >= a_stop && random_parent_2_id < j) {
-            random_parent_2 = previous_generation_chromosomes[random_parent_2_id - a_stop];;
-        } else {
-            random_parent_2 = chromosomes[random_parent_2_id];
-        }
+        Chromosome* random_parent_1 = previous_generation_chromosomes[random_parent_1_id];
+        Chromosome* random_parent_2 = previous_generation_chromosomes[random_parent_2_id];
 
         // Generate offsprings
         offspring = Chromosome::crossover(problem, random_parent_1, random_parent_2);
 
         // Add the new children in the population if they are better then the chromosome they will replace
-        previous_generation_chromosomes.push_back(chromosomes[j]);
         if(offspring[0]->getFitness() > chromosomes[j]->getFitness()) {
             chromosomes[j] = offspring[0];
         }
 
-        previous_generation_chromosomes.push_back(chromosomes[j + 1]);
         if(offspring[1]->getFitness() > chromosomes[j + 1]->getFitness()) {
             chromosomes[j + 1] = offspring[1];
         }
@@ -128,20 +111,17 @@ void evolvePopulation(Problem* problem) {
     // (c) Inversion of top Chromosomes
     for (int j = c_start; j < c_stop; ++j) {
         int random_elite_id = elite_distribution(generator);
-
-        previous_generation_chromosomes.push_back(chromosomes[j]);
         chromosomes[j] = chromosomes[random_elite_id]->inversion(problem);
     }
 
     // (d) Generate new Chromosomes
     for (int j = d_start; j < d_stop; ++j) {
-//        previous_generation_chromosomes.push_back(chromosomes[j]); // not needed anymore
         chromosomes[j] = new Chromosome(problem);
     }
 
     /* Free memory from previous generation chromosomes */
     for(Chromosome* c: previous_generation_chromosomes) {
-        delete c;
+//        delete c; //TODO: delete only replaced chromosomes to avoid nullptr exception
     }
 }
 
@@ -174,7 +154,9 @@ void multistart(Problem* problem, int maxTime) {
 
     int i=0;
     while(time(nullptr) < stoppingTime) {
-        printf("Generation %d\n", ++i);
+        ++i;
+        if(i % 100 == 0)
+            printf("Generation %d\n", i);
         evolvePopulation(problem);
     }
 

@@ -6,9 +6,15 @@
 class Exam {
 
 public:
+    // id as declared on the input
+    int id;
 
-    int id, index;
+    // index of current exam on the exams vector
+    int index;
+
+    // number of student enrolled to this exam
     int enrolledStudents;
+
     std::unordered_map<int, int> conflicts;
 
     /* Constructor */

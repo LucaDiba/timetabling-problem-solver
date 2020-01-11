@@ -9,12 +9,12 @@
 
 float mutRate = 0.8;
 
-Chromosome::Chromosome(Problem* problem) {
+Chromosome::Chromosome(Problem* problem, bool improved_solution) {
 
     mutationRate = mutRate;
 
     solution = new Solution(&(problem->exams), problem->timeslots, problem->students);
-    solution->initializeRandomSolution(false);
+    solution->initializeRandomSolution(true, improved_solution);
 
 }
 

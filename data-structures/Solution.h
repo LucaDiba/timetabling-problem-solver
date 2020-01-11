@@ -31,7 +31,8 @@ public:
     /* Feasibility checker */
     bool getFeasibility(bool evaluatePenalty = true, int start = 0, int end = 0);
     bool getCutFeasibility(int minCut, int maxCut);
-    void initializeRandomSolution(bool feasible = false);
+    void initializeRandomSolution(bool feasible = false, bool improved_solution = false);
+    void moveExam(Exam* exam, int new_timeslot);
 
     double getPenalty();
     double getGain();
@@ -48,7 +49,6 @@ private:
     /* Penalty of the solution */
     bool computedPenalty = false;
     double penalty = 0.0;
-
 };
 
 #endif //DATA_STRUCTURES_CPP

@@ -20,12 +20,13 @@ std::vector<Exam*> readExams(std::string examsInstance){
     file.open(examsInstance, std::ios_base::in);
 
     int examId, examEnrolledStudents;
+    int current_exam_index = -1;
 
     if (!file)
         std::cout << "Unable to open file ";
     else {
         while(file >> examId >> examEnrolledStudents)
-            exams.push_back(new Exam(examId, examId - 1, examEnrolledStudents));
+            exams.push_back(new Exam(examId, ++current_exam_index, examEnrolledStudents));
     }
 
     // Close file

@@ -83,18 +83,22 @@ bool Solution::getCutFeasibility(int minCut, int maxCut) {
 
 }
 
-void Solution::initializeRandomSolution(bool feasible) {
+void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
 
     if(feasible) {
 
         bool found_infeasibility = true;
         std::vector<int> tmp_examsTimeslots(exams->size());
         std::vector<int> shuffled_exams(exams->size());
-        for (int i = 0; i < exams->size(); ++i) {
-            shuffled_exams[i] = i;
+        std::vector<int> shuffled_timeslots(timeslots);
+        for (int i = 0; i < exams->size() || i < timeslots; ++i) {
+            if(i < exams->size())
+                shuffled_exams[i] = i;
+
+            if(i < timeslots)
+                shuffled_timeslots[i] = i;
         }
 
-        int try_n=0;
         while(found_infeasibility) {
             found_infeasibility = false;
             std::uniform_int_distribution<int> exams_distribution(0, exams->size() - 1);
@@ -113,20 +117,24 @@ void Solution::initializeRandomSolution(bool feasible) {
                 int curr_exam = shuffled_exams[i];
 
                 // Search for a timeslot until you find one with no conflicts
+                if (improved_solution)
+                    std::shuffle(std::begin(shuffled_timeslots), std::end(shuffled_timeslots), generator);
+
                 for (int j = 0; j < timeslots && tmp_examsTimeslots[curr_exam] == -1; ++j) {
+                    int rand_timeslot = shuffled_timeslots[j];
                     found_infeasibility = false;
 
                     // Scroll all exams in the current timeslot
-                    for (int k = 0; k < tmp_timeslotsExams[j].size() && !found_infeasibility; ++k) {
-                        int curr_exam_in_timeslot = tmp_timeslotsExams[j][k];
+                    for (int k = 0; k < tmp_timeslotsExams[rand_timeslot].size() && !found_infeasibility; ++k) {
+                        int curr_exam_in_timeslot = tmp_timeslotsExams[rand_timeslot][k];
                         if((*exams)[curr_exam]->hasConflict(curr_exam_in_timeslot)) {
                             found_infeasibility = true;
                         }
                     }
 
                     if (!found_infeasibility) {
-                        tmp_examsTimeslots[curr_exam] = j;
-                        tmp_timeslotsExams[j].emplace_back(i);
+                        tmp_examsTimeslots[curr_exam] = rand_timeslot;
+                        tmp_timeslotsExams[rand_timeslot].emplace_back(i);
                     }
                 }
             }
@@ -151,6 +159,13 @@ void Solution::initializeRandomSolution(bool feasible) {
 
         }
 
+//        printf("Timeslots distribution before:\n");
+//        for (int i = 0; i< timeslots; ++i){
+//            printf("%4d \t", timeslotsExams[i].size());
+//        }
+//        printf("\n");
+//        exit(0);
+
     } else {
 
         // Initialize randomizer
@@ -174,9 +189,11 @@ double Solution::computePenalty() {
         for(int j = i + 1; j < exams->size(); ++j){
             timeslotsDistance = abs(examsTimeslots[i] - examsTimeslots[j]);
             if(timeslotsDistance <= 5 && (*exams)[i]->hasConflict(j))
-                totalPenalty += pow(2, (5 - timeslotsDistance)) * (*exams)[i]->getConflict(j) / students;
+                totalPenalty += pow(2, (5 - timeslotsDistance)) * (*exams)[i]->getConflict(j);
         }
     }
+
+    totalPenalty = totalPenalty / students;
 
     // Set penalty
     setPenalty(totalPenalty);
@@ -196,4 +213,22 @@ double Solution::getGain() {
 void Solution::setPenalty(double newPenalty) {
     computedPenalty = true;
     penalty = newPenalty;
+}
+
+void Solution::moveExam(Exam *exam, int new_timeslot) {
+    // TODO: see if penalty can be changed easily on the fly (in this case remove computePenalty() at the end of this function)
+    // TODO: use moveExam() everywhere
+
+    /* Remove exam from its old timeslot vector */
+    std::vector<int> curr_timeslots = timeslotsExams[examsTimeslots[exam->index]];
+    curr_timeslots.erase(std::remove(curr_timeslots.begin(), curr_timeslots.end(), exam->index), curr_timeslots.end()); // https://stackoverflow.com/a/3385251
+    timeslotsExams[examsTimeslots[exam->index]] = curr_timeslots;
+
+    /* Add exam to the new timeslot vector */
+    timeslotsExams[new_timeslot].push_back(exam->index);
+
+    /* Change the timeslot assigned to the exam */
+    examsTimeslots[exam->index] = new_timeslot;
+
+    computePenalty();
 }
