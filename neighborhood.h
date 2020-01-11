@@ -37,7 +37,7 @@ Solution* getNeighbor(Solution* current_solution) {
 
       //Check if the new solution is better the the previous one (First Improvement)
       if(FI){
-        if(temp->computePenalty() > neighbor->computePenalty()){
+        if(temp->getPenalty() > neighbor->getPenalty()){
           neighbor = temp;
           found = true;
         }
@@ -58,18 +58,16 @@ Solution* getNeighbor(Solution* current_solution) {
  * @param problem
  */
 void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
-    int starting_time = time(NULL);
-    int stopping_time = starting_time + max_neighborhood_time;
-
     // Initial solution: problem->current_solution
     float rand_probability;
 
     //T_zero should be a number such that: exp( -(F(x^) - F(x~))/T_zero ) = 0.5
     //On internet, someone set T to a high number, something like 1000
-    double t_zero = 1000;
+    //max t=300/500 seconds.60%t to multistart remaining ~120/300s for neighborhood
+    double t_zero = 10 * max_neighborhood_time;
     double T = t_zero;
     //cooling_rate = [0,1]. Should be near 1, something like 0.99
-    double cooling_rate = 0.99;
+    double cooling_rate = 0.95 + max_neighborhood_time % 100;
     //(Plateau) Number of iterations after which temperature T can be changed
     int L = 5;
 
@@ -77,8 +75,7 @@ void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
     //Solution coming from the multistart process
     Solution* current_solution = problem->bestSolution;
 
-    int steps = 0;
-    while(time(NULL) < stopping_time) {
+    for(int i=0;;i++) {
         rand_probability = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
         Solution* temp_solution = getNeighbor(current_solution);
@@ -92,23 +89,20 @@ void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
         //F(•) is the penalty function (or similar)
 
         //T should change only after some steps
-        if (steps%L==0) {
+        if (i%L==0) {
             T = T * cooling_rate;
         }
-        steps++;
 
-        double prob = exp( -(temp_solution->computePenalty() - current_solution->computePenalty())/T );
+        double prob = exp( -(temp_solution->getPenalty() - current_solution->getPenalty())/T );
+
         if(prob > rand_probability){
             current_solution = temp_solution;
             //Update best solution if the new solution has an higher score
-            if(current_solution->computePenalty() < best_solution->computePenalty())
-                best_solution = current_solution;
+            problem->handleNewSolution(best_solution);
         }
 
     }
 
-    //Loop end. Update Solution variable with the best solution found
-    problem->handleNewSolution(best_solution);
 }
 
 /**

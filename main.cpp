@@ -21,7 +21,7 @@ int main(int argc, char * argv[]) {
     printf("a");
 
     multistart(problem, max_multistart_time);
-    /neighborhood(problem,max_neighborhood_time);
+    neighborhood(problem, max_neighborhood_time);
 
     return 0;
 }
