@@ -15,11 +15,13 @@ int main(int argc, char * argv[]) {
     int max_time = atoi(argv[2]);
 
     int max_multistart_time = int(max_time * 0.6);
+    int max_neighborhood_time = max_time - max_multistart_time;
 
     Problem *problem = getProblemFromFile(instance_name, max_time);
     printf("a");
+
     multistart(problem, max_multistart_time);
-    // TODO: neighborhood(problem);
+    neighborhood(problem, max_neighborhood_time);
 
     return 0;
 }
