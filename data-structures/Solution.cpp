@@ -134,7 +134,7 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
 
                     if (!found_infeasibility) {
                         tmp_examsTimeslots[curr_exam] = rand_timeslot;
-                        tmp_timeslotsExams[rand_timeslot].emplace_back(i);
+                        tmp_timeslotsExams[rand_timeslot].emplace_back(curr_exam);
                     }
                 }
             }
@@ -158,13 +158,6 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
             timeslotsExams[examsTimeslots[i]].push_back(i);
 
         }
-
-//        printf("Timeslots distribution before:\n");
-//        for (int i = 0; i< timeslots; ++i){
-//            printf("%4d \t", timeslotsExams[i].size());
-//        }
-//        printf("\n");
-//        exit(0);
 
     } else {
 

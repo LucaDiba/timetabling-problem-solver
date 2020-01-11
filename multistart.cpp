@@ -45,6 +45,70 @@ void sortPopulation(Problem* problem) {
 
 }
 
+void evolvePopulation(Problem* problem) {
+
+    // Sort the population in order to have easy access to the best chromosomes
+    sortPopulation(problem);
+
+    // Initialize some variables
+    std::vector<Chromosome*> offspring;
+    int p = int(populationSize * 0.25);
+
+    // There are different ways to generate a new population:
+    // At the beginning you should use crossover a lot,
+    // then reaching the end you should use more mutation
+
+    // In this case I use only crossover, it works fine but when the sentence is almost complete(one or two characters are different)
+    // it slows down and it takes lot of generations to find the first complete solution.
+
+    /*  Given a population: (kind of)
+            a) 1/4 are the top Chromosomes, these will not be changed
+            b) 1/4 are generated with Crossover between top Chromosomes
+            c) 1/4 are generated with Inversion of top Chromosomes
+            d) 1/4 are generated as new Chromosomes
+    */
+    // TODO: add conditions for population size < 4
+    int b_start = p;
+    int b_stop = p * 2 - 2;
+
+    int c_start = p * 2;
+    int c_stop = p * 3 - 1;
+
+    int d_start = p * 3;
+    int d_stop = populationSize - 1;
+
+    // (b) Crossover between top Chromosomes
+    for (int j = b_start; j <= b_stop; j = j + 2) {
+        // Generate offspring
+        // Otherwise choose two random numbers in range [0,top_chromosomes)
+        offspring = Chromosome::crossover(problem, chromosomes[j - p], chromosomes[j - p + 1]);
+
+        // Add the new children in the population if they are better then the chromosome they will replace
+        if(offspring[0]->getFitness() > chromosomes[j]->getFitness()) {
+            delete chromosomes[j];
+            chromosomes[j] = offspring[0];
+        }
+
+        if(offspring[1]->getFitness() > chromosomes[j + 1]->getFitness()) {
+            delete chromosomes[j + 1];
+            chromosomes[j + 1] = offspring[1];
+        }
+
+    }
+
+    // (c) Crossover between any Chromosomes
+    for (int j = c_start; j <= c_stop; j++) {
+        delete chromosomes[j];
+        chromosomes[j] = chromosomes[j - p * 2]->inversion(problem);
+    }
+
+    // (d) Generate new Chromosomes
+    for (int j = d_start; j <= d_stop; j++) {
+        delete chromosomes[j];
+        chromosomes[j] = new Chromosome(problem);
+    }
+}
+
 //void evolvePopulation(Problem* problem) {
 //
 //    // Sort the population in order to have easy access to the best chromosomes
