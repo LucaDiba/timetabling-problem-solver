@@ -17,7 +17,7 @@ void generateInitialPopulation(Problem* problem) {
 
     for (int i = 0; i < populationSize; i++) {
 
-        Chromosome* c = new Chromosome(problem, true);
+        Chromosome* c = new Chromosome(problem, false);
         chromosomes.push_back(c);
 
         tmp_penalty = c->solution->getPenalty();
@@ -31,6 +31,7 @@ void generateInitialPopulation(Problem* problem) {
     printf("- Max penalty:  %f\n", max_penalty);
     printf("- Min penalty:  %f\n", min_penalty);
     printf("- Mean penalty: %f\n", sum_penalty / populationSize);
+
 }
 
 void sortPopulation(Problem* problem) {
@@ -84,15 +85,11 @@ void evolvePopulation(Problem* problem) {
         offspring = Chromosome::crossover(problem, chromosomes[j - p], chromosomes[j - p + 1]);
 
         // Add the new children in the population if they are better then the chromosome they will replace
-        if(offspring[0]->getFitness() > chromosomes[j]->getFitness()) {
-            delete chromosomes[j];
-            chromosomes[j] = offspring[0];
-        }
+        delete chromosomes[j];
+        chromosomes[j] = offspring[0];
 
-        if(offspring[1]->getFitness() > chromosomes[j + 1]->getFitness()) {
-            delete chromosomes[j + 1];
-            chromosomes[j + 1] = offspring[1];
-        }
+        delete chromosomes[j + 1];
+        chromosomes[j + 1] = offspring[1];
 
     }
 
@@ -100,12 +97,14 @@ void evolvePopulation(Problem* problem) {
     for (int j = c_start; j <= c_stop; j++) {
         delete chromosomes[j];
         chromosomes[j] = chromosomes[j - p * 2]->inversion(problem);
+        chromosomes[j]->mutation();
     }
 
     // (d) Generate new Chromosomes
     for (int j = d_start; j <= d_stop; j++) {
         delete chromosomes[j];
         chromosomes[j] = new Chromosome(problem);
+        chromosomes[j]->mutation();
     }
 }
 
@@ -197,12 +196,8 @@ int computePopulationSize(Problem* problem) {
     int problemSize = problem->exams.size();
 
     // TODO: Compute population size according to problem size or density
-    return 12;
+    return 16;
 
-    // Return population size accordingly to problem size
-    if (problemSize > 1000) return int(0.5 * problemSize);
-    else if (problemSize > 100) return problemSize;
-    else return std::max(5, int(1.5 * problemSize));
 }
 
 void multistart(Problem* problem, int maxTime) {
