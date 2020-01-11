@@ -60,9 +60,11 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
     for (int timeslot_id = 0; timeslot_id < timeslots; ++timeslot_id) {
         int timeslot_size = timeslotsExams[timeslot_id].size();
 
-        for (int exam1_id = 0; exam1_id < timeslot_size; ++exam1_id) {
+        for (int i = 0; i < timeslot_size; ++i) {
+            int exam1_id = timeslotsExams[timeslot_id][i];
 
-            for (int exam2_id = exam1_id + 1; exam2_id < timeslot_size; ++exam2_id) {
+            for (int j = i + 1; j < timeslot_size; ++j) {
+                int exam2_id = timeslotsExams[timeslot_id][j];
 
                 if ((*exams)[exam1_id]->hasConflict(exam2_id)) {
                     return false;
@@ -78,19 +80,19 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
 
     /* OLD ONE - recheck */
 
-//    /* Populate timeslots/exam vector of lists */
-//    for(int i = start; i < (end > 0 ? end : exams->size()); i++)
-//        exams->at(i)->timeslot = examsTimeslots[i];
-//
-//    for(int i = start; i < (end > 0 ? end : exams->size()) && isFeasible; i++)
-//        isFeasible = exams->at(i)->evaluateConflicts(exams);
-//
-//    if(!isFeasible)
-//        penalty = 1000;
-//    else if(evaluatePenalty)
-//        penalty = getPenalty();
-//
-//    return isFeasible;
+    /* Populate timeslots/exam vector of lists */
+    for(int i = start; i < (end > 0 ? end : exams->size()); i++)
+        exams->at(i)->timeslot = examsTimeslots[i];
+
+    for(int i = start; i < (end > 0 ? end : exams->size()) && isFeasible; i++)
+        isFeasible = exams->at(i)->evaluateConflicts(exams);
+
+    if(!isFeasible)
+        penalty = 1000;
+    else if(evaluatePenalty)
+        penalty = getPenalty();
+
+    return isFeasible;
 
 }
 
@@ -138,8 +140,8 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
             for (int i = 0; i < shuffled_exams.size() && !found_infeasibility; ++i){
                 int curr_exam = shuffled_exams[i];
 
-                if (improved_solution)
-                    std::shuffle(std::begin(shuffled_timeslots), std::end(shuffled_timeslots), generator);
+//                if (improved_solution)
+//                    std::shuffle(std::begin(shuffled_timeslots), std::end(shuffled_timeslots), generator);
                 
                 // Search for a timeslot until you find one with no conflicts
                 for (int j = 0; j < timeslots && tmp_examsTimeslots[curr_exam] == -1; ++j) {
