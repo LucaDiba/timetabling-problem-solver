@@ -211,11 +211,7 @@ void multistart(Problem* problem, int maxTime) {
     // Generate initial population
     generateInitialPopulation(problem);
 
-    int i=0;
     while(time(nullptr) < stoppingTime) {
-        ++i;
-        if(i % 100 == 0)
-            printf("Generation %d\n", i);
         evolvePopulation(problem);
     }
 
