@@ -49,19 +49,48 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
 
 bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
 
-    /* Populate timeslots/exam vector of lists */
-    for(int i = start; i < (end > 0 ? end : exams->size()); i++)
-        exams->at(i)->timeslot = examsTimeslots[i];
+    timeslotsExams.clear();
+    for(int i = 0; i < timeslots; i++) {
+        timeslotsExams.emplace_back(std::vector<int>());
+    }
+    for (int i=0; i<exams->size(); ++i) {
+        timeslotsExams[examsTimeslots[i]].emplace_back(i);
+    }
 
-    for(int i = start; i < (end > 0 ? end : exams->size()) && isFeasible; i++)
-        isFeasible = exams->at(i)->evaluateConflicts(exams);
+    for (int timeslot_id = 0; timeslot_id < timeslots; ++timeslot_id) {
+        int timeslot_size = timeslotsExams[timeslot_id].size();
 
-    if(!isFeasible)
-        penalty = 1000;
-    else if(evaluatePenalty)
-        penalty = getPenalty();
+        for (int exam1_id = 0; exam1_id < timeslot_size; ++exam1_id) {
 
-    return isFeasible;
+            for (int exam2_id = exam1_id + 1; exam2_id < timeslot_size; ++exam2_id) {
+
+                if ((*exams)[exam1_id]->hasConflict(exam2_id)) {
+                    return false;
+                }
+
+            }
+
+        }
+
+    }
+
+    return true;
+
+    /* OLD ONE - recheck */
+
+//    /* Populate timeslots/exam vector of lists */
+//    for(int i = start; i < (end > 0 ? end : exams->size()); i++)
+//        exams->at(i)->timeslot = examsTimeslots[i];
+//
+//    for(int i = start; i < (end > 0 ? end : exams->size()) && isFeasible; i++)
+//        isFeasible = exams->at(i)->evaluateConflicts(exams);
+//
+//    if(!isFeasible)
+//        penalty = 1000;
+//    else if(evaluatePenalty)
+//        penalty = getPenalty();
+//
+//    return isFeasible;
 
 }
 
