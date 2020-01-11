@@ -14,7 +14,7 @@ int main(int argc, char * argv[]) {
     std::string instance_name = argv[1];
     int max_time = atoi(argv[2]);
 
-    int max_multistart_time = int(max_time * 0.6);
+    int max_multistart_time = int(max_time);
 
     Problem *problem = getProblemFromFile(instance_name, max_time);
 

@@ -17,7 +17,7 @@ void generateInitialPopulation(Problem* problem) {
 
     for (int i = 0; i < populationSize; i++) {
 
-        Chromosome* c = new Chromosome(problem, true);
+        Chromosome* c = new Chromosome(problem, false);
         chromosomes.push_back(c);
 
         tmp_penalty = c->solution->getPenalty();
@@ -198,10 +198,6 @@ int computePopulationSize(Problem* problem) {
     // TODO: Compute population size according to problem size or density
     return 16;
 
-    // Return population size accordingly to problem size
-    if (problemSize > 1000) return int(0.5 * problemSize);
-    else if (problemSize > 100) return problemSize;
-    else return std::max(5, int(1.5 * problemSize));
 }
 
 void multistart(Problem* problem, int maxTime) {

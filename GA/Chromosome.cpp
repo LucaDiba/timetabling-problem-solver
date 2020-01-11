@@ -14,7 +14,7 @@ Chromosome::Chromosome(Problem* problem, bool improved_solution) {
     mutationRate = mutRate;
 
     solution = new Solution(&(problem->exams), problem->timeslots, problem->students);
-    solution->initializeRandomSolution(true, improved_solution);
+    solution->initializeRandomSolution(improved_solution, improved_solution);
 
 }
 
