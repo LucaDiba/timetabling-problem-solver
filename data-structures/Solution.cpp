@@ -54,7 +54,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
         timeslotsExams[examsTimeslots[i]].push_back(i);
 
     /* Check feasibility */
-    for(auto& timeslot: timeslotsExams){
+    for(auto &timeslot: timeslotsExams){
 
         for(int i = 0; i < timeslot.size() && isFeasible; i++){
             for(int j = i; j < timeslot.size() && isFeasible; j++){

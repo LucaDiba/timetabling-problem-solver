@@ -195,7 +195,7 @@ std::vector<Chromosome*> Chromosome::crossover(Problem* problem, Chromosome *fir
 Chromosome *Chromosome::inversion(Problem* problem) {
 
     // Random stuff
-    std::uniform_int_distribution<int> cutDistribution(0, solution->exams->size()/2 - 1);
+    std::uniform_int_distribution<int> cutDistribution(0, solution->exams->size() / 2 - 1);
 
     //Decide how many cuts will be according with the number of timeslot
     int cut = cutDistribution(generator);

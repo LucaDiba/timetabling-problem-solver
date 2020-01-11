@@ -40,7 +40,7 @@ public:
     /**
      * Compute the penalty
      */
-    double computePenalty();
+    void computePenalty();
 
 private:
 
