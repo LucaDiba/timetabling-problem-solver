@@ -93,6 +93,10 @@ void Solution::initializeRandomSolution(bool feasible) {
         for (int i = 0; i < exams->size(); ++i) {
             shuffled_exams[i] = i;
         }
+        std::vector<int> shuffled_timeslots(timeslots);
+        for(int i = 0; i < timeslots; ++i){
+            shuffled_timeslots[i] = i;
+        }
 
         int try_n=0;
         while(found_infeasibility) {
@@ -112,21 +116,25 @@ void Solution::initializeRandomSolution(bool feasible) {
             for (i = 0; i < shuffled_exams.size() && !found_infeasibility; ++i){
                 int curr_exam = shuffled_exams[i];
 
+                std::shuffle(std::begin(shuffled_timeslots), std::end(shuffled_timeslots), generator);
+
                 // Search for a timeslot until you find one with no conflicts
                 for (int j = 0; j < timeslots && tmp_examsTimeslots[curr_exam] == -1; ++j) {
                     found_infeasibility = false;
 
+                    int curr_timeslot = shuffled_timeslots[j];
+                    
                     // Scroll all exams in the current timeslot
-                    for (int k = 0; k < tmp_timeslotsExams[j].size() && !found_infeasibility; ++k) {
-                        int curr_exam_in_timeslot = tmp_timeslotsExams[j][k];
+                    for (int k = 0; k < tmp_timeslotsExams[curr_timeslot].size() && !found_infeasibility; ++k) {
+                        int curr_exam_in_timeslot = tmp_timeslotsExams[curr_timeslot][k];
                         if((*exams)[curr_exam]->hasConflict(curr_exam_in_timeslot)) {
                             found_infeasibility = true;
                         }
                     }
 
                     if (!found_infeasibility) {
-                        tmp_examsTimeslots[curr_exam] = j;
-                        tmp_timeslotsExams[j].emplace_back(i);
+                        tmp_examsTimeslots[curr_exam] = curr_timeslot;
+                        tmp_timeslotsExams[curr_timeslot].emplace_back(curr_exam);
                     }
                 }
             }
