@@ -8,7 +8,7 @@
 #include "../data-structures/Problem.h"
 #include "../data-structures/rand.h"
 
-float mutRate = 0.5;
+float mutRate = 1;
 
 Chromosome::Chromosome(Problem* problem) {
     mutationRate = mutRate;
@@ -190,7 +190,7 @@ std::vector<Chromosome*> Chromosome::crossover(Problem* problem, Chromosome *fir
 Chromosome *Chromosome::inversion(Problem* problem) {
 
     // Random stuff
-    std::uniform_int_distribution<int> cutDistribution(0, solution->exams->size()/2 - 1);
+    std::uniform_int_distribution<int> cutDistribution(0, solution->exams->size() / 2 - 1);
 
     //Decide how many cuts will be according with the number of timeslot
     int cut = cutDistribution(generator);

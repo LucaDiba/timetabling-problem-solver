@@ -51,7 +51,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
         timeslotsExams[examsTimeslots[i]].push_back(i);
 
     /* Check feasibility */
-    for(auto& timeslot: timeslotsExams){
+    for(auto &timeslot: timeslotsExams){
 
         for(int i = 0; i < timeslot.size() && isFeasible; i++){
             for(int j = i; j < timeslot.size() && isFeasible; j++){
@@ -167,7 +167,7 @@ void Solution::initializeRandomSolution(bool feasible) {
 
 }
 
-double Solution::computePenalty() {
+void Solution::computePenalty() {
     double comp_penalty = 0;
     int timeslots_distance;
 
@@ -183,18 +183,14 @@ double Solution::computePenalty() {
             }
         }
     }
-
-    return comp_penalty;
+    penalty = comp_penalty;
 }
 
 double Solution::getPenalty() {
-    double ret_penalty;
-    if(computed_penalty) {
-        ret_penalty = penalty;
-    } else {
-        ret_penalty = penalty = computePenalty();
+    if ( !computed_penalty ) {
+        computePenalty();
     }
-    return ret_penalty;
+    return penalty;
 }
 
 double Solution::getGain() {

@@ -37,9 +37,9 @@ public:
     void setPenalty(double new_penalty);
 
     /**
-     * Compute the penalty and TODO: write it in the best solution file if it is the best
+     * Re-compute the penalty (use it if you change the solution directly)
      */
-    double computePenalty();
+    void computePenalty();
 
 private:
     /* Penalty of the solution */
