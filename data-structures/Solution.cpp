@@ -91,6 +91,7 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
         std::vector<int> tmp_examsTimeslots(exams->size());
         std::vector<int> shuffled_exams(exams->size());
         std::vector<int> shuffled_timeslots(timeslots);
+
         for (int i = 0; i < exams->size() || i < timeslots; ++i) {
             if(i < exams->size())
                 shuffled_exams[i] = i;
@@ -101,40 +102,40 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
 
         while(found_infeasibility) {
             found_infeasibility = false;
-            std::uniform_int_distribution<int> exams_distribution(0, exams->size() - 1);
 
             std::fill(tmp_examsTimeslots.begin(), tmp_examsTimeslots.end(), -1);
-            std::vector<std::vector<int>> tmp_timeslotsExams;
+
             /* Initialize timeslots/exams vector */
+            std::vector<std::vector<int>> tmp_timeslotsExams;
+            tmp_timeslotsExams.reserve(timeslots);
             for(int i = 0; i < timeslots; ++i)
                 tmp_timeslotsExams.emplace_back(std::vector<int>());
 
             std::shuffle(std::begin(shuffled_exams), std::end(shuffled_exams), generator);
 
             // For each exam
-            int i;
-            for (i = 0; i < shuffled_exams.size() && !found_infeasibility; ++i){
+            for (int i = 0; i < shuffled_exams.size() && !found_infeasibility; ++i){
                 int curr_exam = shuffled_exams[i];
 
-                // Search for a timeslot until you find one with no conflicts
                 if (improved_solution)
                     std::shuffle(std::begin(shuffled_timeslots), std::end(shuffled_timeslots), generator);
-
+                
+                // Search for a timeslot until you find one with no conflicts
                 for (int j = 0; j < timeslots && tmp_examsTimeslots[curr_exam] == -1; ++j) {
-                    int rand_timeslot = shuffled_timeslots[j];
+                    int curr_timeslot = shuffled_timeslots[j];
                     found_infeasibility = false;
 
                     // Scroll all exams in the current timeslot
-                    for (int k = 0; k < tmp_timeslotsExams[rand_timeslot].size() && !found_infeasibility; ++k) {
-                        int curr_exam_in_timeslot = tmp_timeslotsExams[rand_timeslot][k];
+                    for (int k = 0; k < tmp_timeslotsExams[curr_timeslot].size() && !found_infeasibility; ++k) {
+                        int curr_exam_in_timeslot = tmp_timeslotsExams[curr_timeslot][k];
                         if((*exams)[curr_exam]->hasConflict(curr_exam_in_timeslot)) {
                             found_infeasibility = true;
                         }
                     }
 
                     if (!found_infeasibility) {
-                        tmp_examsTimeslots[curr_exam] = rand_timeslot;
-                        tmp_timeslotsExams[rand_timeslot].emplace_back(curr_exam);
+                        tmp_examsTimeslots[curr_exam] = curr_timeslot;
+                        tmp_timeslotsExams[curr_timeslot].emplace_back(curr_exam);
                     }
                 }
             }
