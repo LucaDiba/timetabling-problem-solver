@@ -51,29 +51,18 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
 
     /* Populate timeslots/exam vector of lists */
     for(int i = start; i < (end > 0 ? end : exams->size()); i++)
-        timeslotsExams[examsTimeslots[i]].push_back(i);
+        exams->at(i)->timeslot = examsTimeslots[i];
 
-    /* Check feasibility */
-    for(auto &timeslot: timeslotsExams){
+    for(int i = start; i < (end > 0 ? end : exams->size()) && isFeasible; i++)
+        isFeasible = exams->at(i)->evaluateConflicts(exams);
 
-        for(int i = 0; i < timeslot.size() && isFeasible; i++){
-            for(int j = i; j < timeslot.size() && isFeasible; j++){
-                if((*exams)[timeslot[i]]->hasConflict(timeslot[j])) {
-                    penalty = 1000;
-                    isFeasible = false;
-                }
-            }
-        }
-
-        if(!isFeasible)
-            break;
-
-    }
-
-    if(isFeasible && evaluatePenalty)
+    if(!isFeasible)
+        penalty = 1000;
+    else if(evaluatePenalty)
         penalty = getPenalty();
 
     return isFeasible;
+
 }
 
 bool Solution::getCutFeasibility(int minCut, int maxCut) {
@@ -92,14 +81,17 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
         std::vector<int> shuffled_exams(exams->size());
         std::vector<int> shuffled_timeslots(timeslots);
         for (int i = 0; i < exams->size() || i < timeslots; ++i) {
+
             if(i < exams->size())
                 shuffled_exams[i] = i;
 
             if(i < timeslots)
                 shuffled_timeslots[i] = i;
+
         }
 
         while(found_infeasibility) {
+
             found_infeasibility = false;
             std::uniform_int_distribution<int> exams_distribution(0, exams->size() - 1);
 

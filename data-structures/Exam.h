@@ -6,15 +6,9 @@
 class Exam {
 
 public:
-    // id as declared on the input
-    int id;
 
-    // index of current exam on the exams vector
-    int index;
-
-    // number of student enrolled to this exam
+    int id, index, timeslot;
     int enrolledStudents;
-
     std::unordered_map<int, int> conflicts;
 
     /* Constructor */
@@ -24,6 +18,7 @@ public:
     void setConflict(int conflictingExamId);
     int getConflict(int examId);
     bool hasConflict(int examId);
+    bool evaluateConflicts(std::vector<Exam*> *exams);
     void printAllConflicts(std::vector<Exam*> *exams, bool useIndex = false);
 
 };
