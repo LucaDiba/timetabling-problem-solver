@@ -6,7 +6,9 @@ bool Problem::handleNewSolution(Solution *newSolution) {
     // Evaluate solution
     bool isBestSolution = bestSolution == nullptr || newSolution->getPenalty() < bestSolution->getPenalty();
 
-    if(isBestSolution) {
+    // TODO: replace following line and get feasibility when needed
+//    if(isBestSolution) {
+    if(isBestSolution && newSolution->getFeasibility()) {
 
         // Store new best solution
         bestSolution = new Solution(
