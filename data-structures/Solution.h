@@ -11,6 +11,7 @@
 class Solution {
 
 public:
+
     std::vector<Exam*> *exams;
     int timeslots, students;
 
@@ -37,13 +38,14 @@ public:
     void setPenalty(double new_penalty);
 
     /**
-     * Re-compute the penalty (use it if you change the solution directly)
+     * Compute the penalty
      */
     void computePenalty();
 
 private:
+
     /* Penalty of the solution */
-    bool computed_penalty = false;
+    bool computedPenalty = false;
     double penalty = 0.0;
 
 };

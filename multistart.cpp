@@ -2,7 +2,7 @@
 #include "multistart.h"
 #include "data-structures/rand.h"
 
-int population_size;
+int populationSize;
 
 //double best_fitness;
 //Chromosome* best_chromosome;
@@ -12,13 +12,15 @@ int population_size;
 std::vector<Chromosome*> chromosomes;
 
 void generateInitialPopulation(Problem* problem) {
+
     /* Statistics on generated solutions */ //TODO: remove for production for better performances
     double tmp_penalty;
     double min_penalty = std::numeric_limits<double>::max();
     double max_penalty = std::numeric_limits<double>::min();
     double sum_penalty = 0;
 
-    for (int i = 0; i < population_size; i++) {
+    for (int i = 0; i < populationSize; i++) {
+
         Chromosome* c = new Chromosome(problem);
         chromosomes.push_back(c);
 
@@ -26,6 +28,7 @@ void generateInitialPopulation(Problem* problem) {
         min_penalty = (tmp_penalty < min_penalty) ? tmp_penalty : min_penalty;
         max_penalty = (tmp_penalty > max_penalty) ? tmp_penalty : max_penalty;
         sum_penalty += tmp_penalty;
+
     }
 
     printf("Random starting solution statistics:\n");
@@ -68,17 +71,18 @@ void evolvePopulation(Problem* problem) {
             c) 25% (1/4) are generated with Inversion of top Chromosomes
             d) 25% (1/4) are generated as new Chromosomes
     */
+
     int a_start = 0;
-    int a_stop = std::max(1, int(population_size * 0.05));
+    int a_stop = std::max(1, int(populationSize * 0.05));
 
     int b_start = a_stop;
-    int b_stop = b_start + int(population_size * 0.25) - a_stop;
+    int b_stop = b_start + int(populationSize * 0.25) - a_stop;
 
     int c_start = b_stop;
-    int c_stop = b_start + int(population_size * 0.25);
+    int c_stop = b_start + int(populationSize * 0.25);
 
     int d_start = c_stop;
-    int d_stop = population_size;
+    int d_stop = populationSize;
 
     // Elite distribution
     std::uniform_int_distribution<int> elite_distribution(0, a_stop - 1);
@@ -148,6 +152,9 @@ int computePopulationSize(Problem* problem) {
     // Get problem size
     int problemSize = problem->exams.size();
 
+    // TODO: Compute population size according to problem size or density
+    return 12;
+
     // Return population size accordingly to problem size
     if (problemSize > 1000) return int(0.5 * problemSize);
     else if (problemSize > 100) return problemSize;
@@ -165,7 +172,9 @@ void multistart(Problem* problem, int maxTime) {
     // Generate initial population
     generateInitialPopulation(problem);
 
+    int i=0;
     while(time(nullptr) < stoppingTime) {
+        printf("Generation %d\n", ++i);
         evolvePopulation(problem);
     }
 
