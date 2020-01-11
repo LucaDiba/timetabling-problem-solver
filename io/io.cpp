@@ -128,8 +128,12 @@ void writeSolutionOnFile(Problem *p) {
     std::ofstream file;
     file.open(p->instanceName + "_DMOgroup03.sol");
 
-    for(int i = 0; i < p->bestSolution->exams->size(); i++)
-        file << p->bestSolution->exams->at(i)->id << " " << p->bestSolution->examsTimeslots[i] << "\n";
+    for(int i = 0; i < p->bestSolution->exams->size(); i++) {
+        int exam_id = p->bestSolution->exams->at(i)->id;
+        int timeslot_id = p->bestSolution->examsTimeslots[i] + 1; // timeslots start from 1
+
+        file << exam_id << " " << timeslot_id << "\n";
+    }
 
     file.close();
 

@@ -196,7 +196,7 @@ int computePopulationSize(Problem* problem) {
     int problemSize = problem->exams.size();
 
     // TODO: Compute population size according to problem size or density
-    return 16;
+    return problemSize * 1.5;
 
 }
 
