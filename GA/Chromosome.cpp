@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <iterator>
-#include <random>
 #include <vector>
 
 #include "Chromosome.h"
@@ -8,22 +7,27 @@
 #include "../data-structures/Problem.h"
 #include "../data-structures/rand.h"
 
-float mutRate = 0.01;
+float mutRate = 0.8;
 
-Chromosome::Chromosome(Problem* problem) {
+Chromosome::Chromosome(Problem* problem, bool improved_solution) {
+
     mutationRate = mutRate;
 
     solution = new Solution(&(problem->exams), problem->timeslots, problem->students);
-    solution->initializeRandomSolution(true);
+    solution->initializeRandomSolution(improved_solution, improved_solution);
+
 }
 
 Chromosome::Chromosome(Problem* problem, int *initializingSolution) {
+
     mutationRate = mutRate;
 
     solution = new Solution(&problem->exams, problem->timeslots, problem->students, initializingSolution);
+
 }
 
 int *Chromosome::getGenes() {
+
     // Copy current genes
     int *genesCopy = new int[solution->exams->size()];
     std::copy(solution->examsTimeslots, solution->examsTimeslots + solution->exams->size(), genesCopy);
@@ -190,7 +194,7 @@ std::vector<Chromosome*> Chromosome::crossover(Problem* problem, Chromosome *fir
 Chromosome *Chromosome::inversion(Problem* problem) {
 
     // Random stuff
-    std::uniform_int_distribution<int> cutDistribution(0, solution->exams->size()/2 - 1);
+    std::uniform_int_distribution<int> cutDistribution(0, solution->exams->size() / 2 - 1);
 
     //Decide how many cuts will be according with the number of timeslot
     int cut = cutDistribution(generator);
@@ -215,6 +219,5 @@ double Chromosome::getFitness() {
 }
 
 Chromosome::~Chromosome() {
-    delete solution;
     delete solution;
 }

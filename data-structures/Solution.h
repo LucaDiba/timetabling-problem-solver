@@ -11,6 +11,7 @@
 class Solution {
 
 public:
+
     std::vector<Exam*> *exams;
     int timeslots, students;
 
@@ -30,22 +31,25 @@ public:
     /* Feasibility checker */
     bool getFeasibility(bool evaluatePenalty = true, int start = 0, int end = 0);
     bool getCutFeasibility(int minCut, int maxCut);
-    void initializeRandomSolution(bool feasible = false);
+    void initializeRandomSolution(bool feasible = false, bool improved_solution = false);
+    void moveExam(Exam* exam, int new_timeslot);
 
     double getPenalty();
     double getGain();
     void setPenalty(double new_penalty);
 
+
     /**
-     * Compute the penalty and TODO: write it in the best solution file if it is the best
+     * Force re-computation of the penalty
+     * Use it only if you're sure that the solution has changed, otherwise call getPenalty()
      */
     double computePenalty();
 
 private:
-    /* Penalty of the solution */
-    bool computed_penalty = false;
-    double penalty = 0.0;
 
+    /* Penalty of the solution */
+    bool computedPenalty = false;
+    double penalty = 0.0;
 };
 
 #endif //DATA_STRUCTURES_CPP

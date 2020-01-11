@@ -29,6 +29,18 @@ bool Exam::hasConflict(int examIndex) {
     return (conflicts.find(examIndex) != conflicts.end());
 }
 
+bool Exam::evaluateConflicts(std::vector<Exam*> *exams) {
+
+    int e = 0;
+    bool thisHasConflict = false;
+
+    while(!thisHasConflict)
+        thisHasConflict = (timeslot != exams->at(conflicts[e++])->timeslot);
+
+    return thisHasConflict;
+
+}
+
 void Exam::printAllConflicts(std::vector<Exam*> *exams, bool useIndex) {
 
     /* Choose index or id and print conflicts */

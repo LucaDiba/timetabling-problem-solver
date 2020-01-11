@@ -7,7 +7,7 @@ class Exam {
 
 public:
 
-    int id, index;
+    int id, index, timeslot;
     int enrolledStudents;
     std::unordered_map<int, int> conflicts;
 
@@ -18,6 +18,7 @@ public:
     void setConflict(int conflictingExamId);
     int getConflict(int examId);
     bool hasConflict(int examId);
+    bool evaluateConflicts(std::vector<Exam*> *exams);
     void printAllConflicts(std::vector<Exam*> *exams, bool useIndex = false);
 
 };
