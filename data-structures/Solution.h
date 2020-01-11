@@ -38,7 +38,8 @@ public:
     void setPenalty(double new_penalty);
 
     /**
-     * Compute the penalty
+     * Force re-computation of the penalty
+     * Use it only if you're sure that the solution has changed, otherwise call getPenalty()
      */
     double computePenalty();
 

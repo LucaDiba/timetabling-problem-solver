@@ -35,6 +35,6 @@ int computePopulationSize(Problem* problem);
  * Execute a multi-start algorithm on the given problem
  * @param problem
  */
-void multistart(Problem* problem, int maxTime, float populationRatio = 0.25);
+void multistart(Problem* problem, int maxTime);
 
 #endif //MULTISTART_CPP
