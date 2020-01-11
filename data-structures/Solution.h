@@ -11,6 +11,7 @@
 class Solution {
 
 public:
+
     std::vector<Exam*> *exams;
     int timeslots, students;
 
@@ -37,13 +38,14 @@ public:
     void setPenalty(double new_penalty);
 
     /**
-     * Compute the penalty and TODO: write it in the best solution file if it is the best
+     * Compute the penalty
      */
     double computePenalty();
 
 private:
+
     /* Penalty of the solution */
-    bool computed_penalty = false;
+    bool computedPenalty = false;
     double penalty = 0.0;
 
 };

@@ -12,6 +12,7 @@ float populationRatio;
 std::vector<Chromosome*> chromosomes;
 
 void generateInitialPopulation(Problem* problem) {
+
     /* Statistics on generated solutions */ //TODO: remove for production for better performances
     double tmp_penalty;
     double min_penalty = std::numeric_limits<double>::max();
@@ -19,6 +20,7 @@ void generateInitialPopulation(Problem* problem) {
     double sum_penalty = 0;
 
     for (int i = 0; i < populationSize; i++) {
+
         Chromosome* c = new Chromosome(problem);
         chromosomes.push_back(c);
 
@@ -26,6 +28,7 @@ void generateInitialPopulation(Problem* problem) {
         min_penalty = (tmp_penalty < min_penalty) ? tmp_penalty : min_penalty;
         max_penalty = (tmp_penalty > max_penalty) ? tmp_penalty : max_penalty;
         sum_penalty += tmp_penalty;
+
     }
 
     printf("Random starting solution statistics:\n");
@@ -68,7 +71,7 @@ void evolvePopulation(Problem* problem) {
             c) 1/4 are generated with Inversion of top Chromosomes
             d) 1/4 are generated as new Chromosomes
     */
-    // TODO: add conditions for population size < 4
+
     int a_start = 0;
     int a_stop = p - 1;
 
@@ -83,7 +86,7 @@ void evolvePopulation(Problem* problem) {
 
     // (b) Crossover between top Chromosomes
     for (int j = b_start; j <= b_stop; j = j + 2) {
-//    for (int j = b_start; j <= c_stop-1; j = j + 2) {
+
         // Generate offspring
         // Otherwise choose two random numbers in range [0,top_chromosomes)
         offspring = Chromosome::crossover(problem, chromosomes[j - p], chromosomes[j - p + 1]);
@@ -122,10 +125,14 @@ int computePopulationSize(Problem* problem) {
     // Get problem size
     int problemSize = problem->exams.size();
 
+    // TODO: Compute population size according to problem size or density
+    return 12;
+
     // Return population size accordingly to problem size
     if (problemSize > 1000) return int(0.5 * problemSize);
     else if (problemSize > 100) return problemSize;
     else return int(1.5 * problemSize);
+
 }
 
 void multistart(Problem* problem, int maxTime, float ratio) {
@@ -140,21 +147,10 @@ void multistart(Problem* problem, int maxTime, float ratio) {
     // Generate initial population
     generateInitialPopulation(problem);
 
-
-//    for (int i=0; i<chromosomes.size(); ++i) {
-//        printf("a");
-//        int* genes = chromosomes[i]->getGenes();
-//        for (int j=0; j<4; j++) {
-//            printf("%d ", genes[j]);
-//        }
-//        printf("\n");
-//    }
-//    return;
-
     int i=0;
     while(time(nullptr) < stoppingTime) {
         evolvePopulation(problem);
-        i++;
+        printf("Generation %d: \n", ++i);
     }
 
 }

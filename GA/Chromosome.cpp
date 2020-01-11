@@ -8,22 +8,27 @@
 #include "../data-structures/Problem.h"
 #include "../data-structures/rand.h"
 
-float mutRate = 0.5;
+float mutRate = 0.8;
 
 Chromosome::Chromosome(Problem* problem) {
+
     mutationRate = mutRate;
 
     solution = new Solution(&(problem->exams), problem->timeslots, problem->students);
-    solution->initializeRandomSolution(true);
+    solution->initializeRandomSolution(false);
+
 }
 
 Chromosome::Chromosome(Problem* problem, int *initializingSolution) {
+
     mutationRate = mutRate;
 
     solution = new Solution(&problem->exams, problem->timeslots, problem->students, initializingSolution);
+
 }
 
 int *Chromosome::getGenes() {
+
     // Copy current genes
     int *genesCopy = new int[solution->exams->size()];
     std::copy(solution->examsTimeslots, solution->examsTimeslots + solution->exams->size(), genesCopy);

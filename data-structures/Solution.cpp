@@ -36,16 +36,19 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
     /* Generate collections for exams/timeslots mapping and vice-versa */
     examsTimeslots = new int[exams->size()];
     for(int i = 0; i < examsVector->size(); ++i) {
+
         /* Copy exam's timeslot */
         examsTimeslots[i] = initializingSolution[i];
 
         /* Add exam to its timeslot */
         timeslotsExams[examsTimeslots[i]].push_back(i);
+
     }
 
 };
 
 bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
+
     /* Populate timeslots/exam vector of lists */
     for(int i = start; i < (end > 0 ? end : exams->size()); i++)
         timeslotsExams[examsTimeslots[i]].push_back(i);
@@ -56,7 +59,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
         for(int i = 0; i < timeslot.size() && isFeasible; i++){
             for(int j = i; j < timeslot.size() && isFeasible; j++){
                 if((*exams)[timeslot[i]]->hasConflict(timeslot[j])) {
-                    penalty = 1000;//std::numeric_limits<double>::max();
+                    penalty = 1000;
                     isFeasible = false;
                 }
             }
@@ -68,7 +71,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
     }
 
     if(isFeasible && evaluatePenalty)
-        computePenalty();
+        penalty = getPenalty();
 
     return isFeasible;
 }
@@ -80,17 +83,10 @@ bool Solution::getCutFeasibility(int minCut, int maxCut) {
 
 }
 
-void displayy(std::vector<int> a) //TODO: remove after debug
-{
-    for (int i = 0; i < a.size(); i++) {
-        printf("%d ", a[i]);
-    }
-    printf("\n");
-}
-
 void Solution::initializeRandomSolution(bool feasible) {
 
     if(feasible) {
+
         bool found_infeasibility = true;
         std::vector<int> tmp_examsTimeslots(exams->size());
         std::vector<int> shuffled_exams(exams->size());
@@ -110,7 +106,6 @@ void Solution::initializeRandomSolution(bool feasible) {
                 tmp_timeslotsExams.emplace_back(std::vector<int>());
 
             std::shuffle(std::begin(shuffled_exams), std::end(shuffled_exams), generator);
-//            displayy(shuffled_exams);
 
             // For each exam
             int i;
@@ -125,7 +120,6 @@ void Solution::initializeRandomSolution(bool feasible) {
                     for (int k = 0; k < tmp_timeslotsExams[j].size() && !found_infeasibility; ++k) {
                         int curr_exam_in_timeslot = tmp_timeslotsExams[j][k];
                         if((*exams)[curr_exam]->hasConflict(curr_exam_in_timeslot)) {
-//                            printf("\t\texam %d with exam %d\n", i, shuffled_exams[k]);
                             found_infeasibility = true;
                         }
                     }
@@ -136,7 +130,6 @@ void Solution::initializeRandomSolution(bool feasible) {
                     }
                 }
             }
-//            printf("Try %d \t blocked at %d of %d (%d)\n", ++try_n, i, exams->size(), shuffled_exams.size());
         }
 
 
@@ -149,13 +142,17 @@ void Solution::initializeRandomSolution(bool feasible) {
         /* Generate collections for exams/timeslots mapping and vice-versa */
         examsTimeslots = new int[exams->size()];
         for(int i = 0; i < exams->size(); ++i) {
+
             /* Copy exam's timeslot */
             examsTimeslots[i] = tmp_examsTimeslots[i];
 
             /* Add exam to its timeslot */
             timeslotsExams[examsTimeslots[i]].push_back(i);
+
         }
+
     } else {
+
         // Initialize randomizer
         std::uniform_int_distribution<int> distribution(0, timeslots - 1);
 
@@ -168,47 +165,35 @@ void Solution::initializeRandomSolution(bool feasible) {
 }
 
 double Solution::computePenalty() {
-    double comp_penalty = 0;
-    int timeslots_distance;
+
+    double totalPenalty = 0;
+    int timeslotsDistance;
 
     // Compute penalty
     for(int i = 0; i < exams->size(); ++i){
         for(int j = i + 1; j < exams->size(); ++j){
-            timeslots_distance = abs(examsTimeslots[i] - examsTimeslots[j]);
-            if(
-                    timeslots_distance <= 5 // difference between timeslots <= 5
-                    && (*exams)[i]->hasConflict(j) // at least one student
-                ) {
-                comp_penalty += pow(2, (5 - timeslots_distance)) * (*exams)[i]->getConflict(j) / students;
-            }
+            timeslotsDistance = abs(examsTimeslots[i] - examsTimeslots[j]);
+            if(timeslotsDistance <= 5 && (*exams)[i]->hasConflict(j))
+                totalPenalty += pow(2, (5 - timeslotsDistance)) * (*exams)[i]->getConflict(j) / students;
         }
     }
 
-    return comp_penalty;
+    // Set penalty
+    setPenalty(totalPenalty);
+
+    return totalPenalty;
+
 }
 
 double Solution::getPenalty() {
-    double ret_penalty;
-    if(computed_penalty) {
-        ret_penalty = penalty;
-    } else {
-        ret_penalty = penalty = computePenalty();
-    }
-    return ret_penalty;
+    return (computedPenalty ? penalty : computePenalty());
 }
 
 double Solution::getGain() {
-    double gain;
-    double tmp_penalty = getPenalty();
-    if (tmp_penalty == 0) { // avoid dividing by zero
-        gain = std::numeric_limits<double>::max();
-    } else {
-        gain = 1.0 / tmp_penalty;
-    }
-    return gain;
+    return (getPenalty() == 0 ? std::numeric_limits<double>::max() : 1.0/getPenalty());
 }
 
-void Solution::setPenalty(double new_penalty) {
-    computed_penalty = true;
-    penalty = new_penalty;
+void Solution::setPenalty(double newPenalty) {
+    computedPenalty = true;
+    penalty = newPenalty;
 }
