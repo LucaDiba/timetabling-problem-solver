@@ -37,7 +37,7 @@ std::vector<Exam*> readExams(std::string examsInstance){
 }
 
 /* Get conflicts from enrolled students */
-void retrieveConflicts(std::string& studentsInstance, std::vector<Exam*> exams, int *students) {
+void retrieveConflicts(std::string studentsInstance, std::vector<Exam*> exams, int *students) {
 
     // File IO
     std::ifstream file;
