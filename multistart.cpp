@@ -2,7 +2,7 @@
 #include "multistart.h"
 #include "data-structures/rand.h"
 
-int population_size;
+int populationSize;
 
 //double best_fitness;
 //Chromosome* best_chromosome;
@@ -34,7 +34,7 @@ void generateInitialPopulation(Problem* problem) {
     printf("Random starting solution statistics:\n");
     printf("- Max penalty:  %f\n", max_penalty);
     printf("- Min penalty:  %f\n", min_penalty);
-    printf("- Mean penalty: %f\n", sum_penalty / population_size);
+    printf("- Mean penalty: %f\n", sum_penalty / populationSize);
 }
 
 void sortPopulation(Problem* problem) {
@@ -75,23 +75,23 @@ void evolvePopulation(Problem* problem) {
     */
 
     int a_start = 0;
-    int a_stop = std::max(1, int(population_size * 0.05));
+    int a_stop = std::max(1, int(populationSize * 0.05));
 
     int b_start = a_stop;
-    int b_stop = b_start + int(population_size * 0.25) - a_stop;
+    int b_stop = b_start + int(populationSize * 0.25) - a_stop;
 
     int c_start = b_stop;
-    int c_stop = b_start + int(population_size * 0.25);
+    int c_stop = b_start + int(populationSize * 0.25);
 
     int d_start = c_stop;
-    int d_stop = population_size;
+    int d_stop = populationSize;
 
     // (b) Crossover between top Chromosomes
     for (int j = b_start; j <= b_stop; j = j + 2) {
 
         // Generate offspring
         // Otherwise choose two random numbers in range [0,top_chromosomes)
-        offspring = Chromosome::crossover(problem, chromosomes[random_parent_1], chromosomes[random_parent_2]);
+        offspring = Chromosome::crossover(problem, chromosomes[j], chromosomes[j + 1]);
 
         // Add the new children in the population if they are better then the chromosome they will replace
         if(offspring[0]->getFitness() > chromosomes[j]->getFitness()) {
@@ -109,13 +109,8 @@ void evolvePopulation(Problem* problem) {
     // (c) Inversion of top Chromosomes
     std::uniform_int_distribution<int> elite_distribution(0, a_stop - 1);
     for (int j = c_start; j < c_stop; ++j) {
-        int random_elite = elite_distribution(generator);
-
         delete chromosomes[j];
-        chromosomes[j] = chromosomes[random_elite]->inversion(problem);
-
-
-        printf("inversion feasibility: %d\n", chromosomes[j]->solution->getFeasibility());
+        chromosomes[j] = chromosomes[elite_distribution(generator)]->inversion(problem);
     }
 
     // (d) Generate new Chromosomes
@@ -143,13 +138,13 @@ int computePopulationSize(Problem* problem) {
 
 }
 
-void multistart(Problem* problem, int maxTime) {
+void multistart(Problem* problem, int maxTime, float populationRatio) {
 
     int startingTime = time(nullptr);
     int stoppingTime = startingTime + maxTime;
 
     // Compute population size accordingly to problem size
-    population_size = computePopulationSize(problem);
+    populationSize = computePopulationSize(problem);
 
     // Generate initial population
     generateInitialPopulation(problem);
