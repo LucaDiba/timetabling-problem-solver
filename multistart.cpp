@@ -34,7 +34,7 @@ void generateInitialPopulation(Problem* problem) {
     printf("Random starting solution statistics:\n");
     printf("- Max penalty:  %f\n", max_penalty);
     printf("- Min penalty:  %f\n", min_penalty);
-    printf("- Mean penalty: %f\n", sum_penalty / population_size);
+    printf("- Mean penalty: %f\n", sum_penalty / populationSize);
 }
 
 void sortPopulation(Problem* problem) {
@@ -92,7 +92,7 @@ void evolvePopulation(Problem* problem) {
         /* Take a random chromosome
          * If it's an already substituted chromosome, take it from previous generation to maintain uniformity
          */
-        std::uniform_int_distribution<int> population_distribution(0, population_size - 1);
+        std::uniform_int_distribution<int> population_distribution(0, populationSize - 1);
 
         int random_parent_1_id = population_distribution(generator);
         int random_parent_2_id = population_distribution(generator);
@@ -167,7 +167,7 @@ void multistart(Problem* problem, int maxTime) {
     int stoppingTime = startingTime + maxTime;
 
     // Compute population size accordingly to problem size
-    population_size = computePopulationSize(problem);
+    populationSize = computePopulationSize(problem);
 
     // Generate initial population
     generateInitialPopulation(problem);
