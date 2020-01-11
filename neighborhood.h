@@ -63,11 +63,12 @@ void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
 
     //T_zero should be a number such that: exp( -(F(x^) - F(x~))/T_zero ) = 0.5
     //On internet, someone set T to a high number, something like 1000
-    //max t=300/500 seconds.60%t to multistart remaining ~120/300s for neighborhood
-    double t_zero = 10 * max_neighborhood_time;
+    //max t=180/300 seconds. 60%t to multistart, remaining ~108/180s for neighborhood
+    double t_zero = 5 * max_neighborhood_time;
     double T = t_zero;
     //cooling_rate = [0,1]. Should be near 1, something like 0.99
-    double cooling_rate = 0.95 + max_neighborhood_time % 100;
+    //set it to a smaller value will speed up the process but it may skip best solutions
+    double cooling_rate = 0.80 + max_neighborhood_time % 10;
     //(Plateau) Number of iterations after which temperature T can be changed
     int L = 5;
 
