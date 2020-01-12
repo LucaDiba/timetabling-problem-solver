@@ -82,14 +82,22 @@ void evolvePopulation(Problem* problem) {
     for (int j = b_start; j <= b_stop; j = j + 2) {
         // Generate offspring
         // Otherwise choose two random numbers in range [0,top_chromosomes)
-        offspring = Chromosome::crossover(problem, chromosomes[j - p], chromosomes[j - p + 1]);
+        std::uniform_int_distribution<int> population_distribution(0, populationSize - 1);
+        int parent_1 = population_distribution(generator);
+        int parent_2;
+        do{
+            parent_2 = population_distribution(generator);
+        } while(parent_1 == parent_2);
+
+        Chromosome* newchild1 = Chromosome::crossover(problem, chromosomes[parent_1], chromosomes[parent_2]);
+        Chromosome* newchild2 = Chromosome::crossover(problem, chromosomes[parent_2], chromosomes[parent_1]);
 
         // Add the new children in the population if they are better then the chromosome they will replace
         delete chromosomes[j];
-        chromosomes[j] = offspring[0];
+        chromosomes[j] = newchild1; 
 
         delete chromosomes[j + 1];
-        chromosomes[j + 1] = offspring[1];
+        chromosomes[j + 1] = newchild2;
 
     }
 

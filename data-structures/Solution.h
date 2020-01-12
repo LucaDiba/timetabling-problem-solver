@@ -51,6 +51,7 @@ public:
     bool isMoveFeasible(Exam* toBePlaced, int timeslot);
     bool randomMove(std::vector<int> bucket);
     void initSolution();
+    double calcPenaltyDelta(int exam, int timeslotSrc, int timeslotDest);
 
     /**
      * Force re-computation of the penalty

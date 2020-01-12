@@ -389,6 +389,24 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
 
 }
 
+double Solution::calcPenaltyDelta(int exam, int timeslotSrc, int timeslotDest){
+    double totalPenalty = 0;
+
+    for(int i = 0; i < exams->size(); ++i){
+        int timeslotsDistance = abs(timeslotDest - examsTimeslots[i]);
+        if(timeslotsDistance <= 5 && (*exams)[exam]->hasConflict(i))
+            totalPenalty += pow(2, (5 - timeslotsDistance)) * (*exams)[exam]->getConflict(i);
+    }
+
+    for(int j = 0; j < exams->size(); ++j){
+        int timeslotsDistance = abs(timeslotSrc - examsTimeslots[j]);
+        if(timeslotsDistance <= 5 && (*exams)[exam]->hasConflict(j))
+            totalPenalty -= pow(2, (5 - timeslotsDistance)) * (*exams)[exam]->getConflict(j);
+    }
+
+    return totalPenalty;
+}
+
 double Solution::computePenalty() {
 
     double totalPenalty = 0;
@@ -440,5 +458,5 @@ void Solution::moveExam(Exam *exam, int new_timeslot) {
     /* Change the timeslot assigned to the exam */
     examsTimeslots[exam->index] = new_timeslot;
 
-    computePenalty();
+    //computePenalty();
 }

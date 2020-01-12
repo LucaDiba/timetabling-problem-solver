@@ -37,7 +37,7 @@ public:
      * WARNING: FEASIBILITY NOT GUARANTEED!
      */
     void mutation();
-    static std::vector<Chromosome*> crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent, bool ordered = false);
+    static Chromosome* crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent);
 
     /**
      * Swap genes
