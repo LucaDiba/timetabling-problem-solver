@@ -40,7 +40,7 @@ void sortPopulation(Problem* problem) {
 
     // Define a lambda to sort chromosomes
     std::sort(chromosomes.begin(), chromosomes.end(), [](Chromosome *one, Chromosome *two) {
-        return one->getFitness() > two->getFitness();
+        return one->solution->getPenalty() < two->solution->getPenalty();
     });
 
     // Evaluate new solution
@@ -219,9 +219,7 @@ int computePopulationSize(Problem* problem) {
 
     // Get problem size
     int problemSize = problem->exams.size();
-
-    // TODO: Compute population size according to problem size or density
-    return 20;
+    return std::max(int(problemSize * 0.1), 10);
 
 }
 
@@ -235,9 +233,22 @@ void multistart(Problem* problem, int maxTime) {
 
     // Generate initial population
     generateInitialPopulation(problem);
-    int i = 0;
+
+    int time_start_generations_without_improvements = time(nullptr);
+    double tmp_best_penalty = problem->bestSolution->getPenalty();
+
     while(time(nullptr) < stoppingTime) {
-        //printf("Generation %d \n", i++);
+        if(problem->bestSolution->getPenalty() < tmp_best_penalty) {
+            time_start_generations_without_improvements = time(nullptr);
+            tmp_best_penalty = problem->bestSolution->getPenalty();
+        }
+
+        int time_run = time(nullptr) - problem->start_time;
+        int time_passed_without_improvement = time(nullptr) - time_start_generations_without_improvements;
+        if (time_run > problem->max_time * 0.5 && time_passed_without_improvement > 0.1 * maxTime) {
+            return;
+        }
+
         evolvePopulation(problem);
     }
 
