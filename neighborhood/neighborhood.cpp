@@ -71,8 +71,16 @@ void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
     int L = 10 * problem->exams.size() * problem->timeslots;
 
     problem->currentSolution = new Solution(problem->bestSolution); // copy the entire solution if you delete it after
+    int time_start_without_improvements = time(nullptr);
+    double tmp_best_penalty = problem->bestSolution->getPenalty();
 
     for(int i = 0; ; ++i) {
+        int time_passed_without_improvement = time(nullptr) - time_start_without_improvements;
+        if (time_passed_without_improvement > 0.2 * max_neighborhood_time) {
+
+            delete problem->currentSolution;
+            problem->currentSolution = new Solution(problem->bestSolution);
+        }
         Solution* neighbor = getNeighbor(problem);
 
         rand_probability = float(percent_distribution(generator)) / 100;
@@ -89,6 +97,10 @@ void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
             problem->handleNewSolution(problem->currentSolution);
         }
 
+        if(problem->bestSolution->getPenalty() < tmp_best_penalty) {
+            time_start_without_improvements = time(nullptr);
+            tmp_best_penalty = problem->bestSolution->getPenalty();
+        }
     }
 
 }
