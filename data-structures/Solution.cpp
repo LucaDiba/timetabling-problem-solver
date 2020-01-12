@@ -43,6 +43,8 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
         /* Add exam to its timeslot */
         timeslotsExams[examsTimeslots[i]].push_back(i);
 
+        exams->at(i)->timeslot = initializingSolution[i];
+
     }
 
 };
@@ -81,7 +83,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
     /* OLD ONE - recheck */
 
     /* Populate timeslots/exam vector of lists */
-    for(int i = start; i < (end > 0 ? end : exams->size()); i++)
+/*     for(int i = start; i < (end > 0 ? end : exams->size()); i++)
         exams->at(i)->timeslot = examsTimeslots[i];
 
     for(int i = start; i < (end > 0 ? end : exams->size()) && isFeasible; i++)
@@ -92,7 +94,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
     else if(evaluatePenalty)
         penalty = getPenalty();
 
-    return isFeasible;
+    return isFeasible; */
 
 }
 
@@ -457,6 +459,8 @@ void Solution::moveExam(Exam *exam, int new_timeslot) {
 
     /* Change the timeslot assigned to the exam */
     examsTimeslots[exam->index] = new_timeslot;
+
+    exam->timeslot = new_timeslot;
 
     //computePenalty();
 }

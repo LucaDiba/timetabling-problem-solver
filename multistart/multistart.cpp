@@ -79,7 +79,7 @@ void evolvePopulation(Problem* problem) {
     int d_stop = populationSize - 1;
 
     // (b) Crossover between top Chromosomes
-    for (int j = b_start; j <= b_stop; j = j + 2) {
+    for (int j = b_start; j <= c_stop; j = j + 2) {
         // Generate offspring
         // Otherwise choose two random numbers in range [0,top_chromosomes)
         std::uniform_int_distribution<int> population_distribution(0, populationSize - 1);
@@ -95,10 +95,11 @@ void evolvePopulation(Problem* problem) {
         // Add the new children in the population if they are better then the chromosome they will replace
         delete chromosomes[j];
         chromosomes[j] = newchild1; 
+        //printf("%d \n", chromosomes[j]->solution->getFeasibility());
 
         delete chromosomes[j + 1];
         chromosomes[j + 1] = newchild2;
-
+        //printf("%d \n", chromosomes[j + 1]->solution->getFeasibility());
     }
 
     // (c) Crossover between any Chromosomes
@@ -108,11 +109,15 @@ void evolvePopulation(Problem* problem) {
         chromosomes[j]->mutation();
     } */
 
-    for (int j = c_start; j <= d_stop; j++) {
+    for (int j = d_start; j <= d_stop; j++) {
         delete chromosomes[j];
-        chromosomes[j] = chromosomes[j - p * 2]->timeslot_inversion(problem);
+        chromosomes[j] = chromosomes[j - p * 3]->timeslot_inversion(problem);
     }
     
+/*     for(int i = 0; i < p; i++){
+        printf("aq\n");
+        printf("%d \n", chromosomes[i]->solution->getFeasibility());
+    } */
     // (d) Generate new Chromosomes
 /*     for (int j = d_start; j <= d_stop; j++) {
         delete chromosomes[j];
@@ -225,7 +230,7 @@ void multistart(Problem* problem, int maxTime) {
     generateInitialPopulation(problem);
     int i = 0;
     while(time(nullptr) < stoppingTime) {
-        printf("Generation %d \n", i++);
+        //printf("Generation %d \n", i++);
         evolvePopulation(problem);
     }
 

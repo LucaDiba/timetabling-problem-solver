@@ -180,8 +180,9 @@ Chromosome* Chromosome::crossover(Problem* problem, Chromosome *firstParent, Chr
         
         for(int exam : secondParent->solution->timeslotsExams[randomTimeslot]){
             int timeslotSrc = firstParent->solution->examsTimeslots[exam];
+            Exam* examObj = firstChild->solution->exams->at(exam);
 
-            if(timeslotSrc != correspondentTimeslot_parent1)
+            if(timeslotSrc != correspondentTimeslot_parent1 && !examObj->evaluateConflicts(firstChild->solution->exams, correspondentTimeslot_parent1))
                 firstChild->solution->moveExam(firstChild->solution->exams->at(exam), correspondentTimeslot_parent1);
         }
     }
