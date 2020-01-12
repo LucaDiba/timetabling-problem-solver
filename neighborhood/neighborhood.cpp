@@ -18,75 +18,75 @@ Solution* getNeighbor(Problem* problem) {
         int mutant_exam_id = examsDistribution(generator);
         Exam* mutant_exam = problem->exams[mutant_exam_id];
 
-        int current_slot = problem->currentSolution->examsTimeslots[mutant_exam_id];
-//        int mutant_slot = (current_slot + int(problem->timeslots / 2)) % problem->timeslots;
-        int mutant_slot = timeslotsDistribution(generator);
+        int current_slot = temp->examsTimeslots[mutant_exam_id];
+        int mutant_slot;
+        do{
+            mutant_slot = timeslotsDistribution(generator);
+        } while( mutant_slot == current_slot );
 
-        // TODO: check if the exam has no conflict with all the other exams in that timeslot before computing everything
+        /* Check if the exam has no conflict with all the other exams in that timeslot */
+        bool feasible = true;
+        for (int tmp_exam_id : temp->timeslotsExams[mutant_slot]) {
+            if(mutant_exam->hasConflict(tmp_exam_id)) {
+                feasible = false;
+                break;
+            }
+        }
 
-        temp->moveExam(mutant_exam, mutant_slot);
-
-        if(temp->getPenalty() < problem->currentSolution->getPenalty()){
+        if(feasible){
+            temp->moveExam(mutant_exam, mutant_slot);
             return temp;
-        } else {
-            delete temp;
         }
 
     }
 }
 
-double getCurrentProbability(Problem* problem, Solution* sol, double T) {
-    return exp( -(sol->getPenalty() - problem->currentSolution->getPenalty()) / T );
+double getCurrentProbability(Problem* problem, Solution* candidate_solution, double T) {
+    return exp( -(candidate_solution->getPenalty() - problem->currentSolution->getPenalty()) / T );
 }
 
 void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
     // Initial solution: problem->current_solution
     std::uniform_int_distribution<int> percent_distribution(0, 100);
-    float rand_probability;
+    double rand_probability, curr_probability;
 
     /* T_zero should be a number such that: exp( -(F(x^) - F(x~))/T_zero ) = 0.5
      * On internet, someone set T to a high number, something like 1000
      * max t=180/300 seconds. 60%t to multistart, remaining ~108/180s for neighborhood
      */
-    double t_zero = 5 * max_neighborhood_time;
+    double neighborhood_avg_penalty = problem->bestSolution->getPenalty() * 1.1;
+    double T_zero = - (neighborhood_avg_penalty - problem->bestSolution->getPenalty()) / log(0.5);
 
-    double T = t_zero;
+    double T = T_zero;
 
     /* cooling_rate = [0,1]. Should be near 1, something like 0.99
      * set it to a smaller value will speed up the process but it may skip best solutions
      */
-    double cooling_rate = 0.80 + max_neighborhood_time % 10;
+    double cooling_rate = 0.99;
 
-    /* (Plateau) Number of iterations after which temperature T can be changed */
-    int L = 5;
+    /* (Plateau) Number of iterations after which temperature T can be changed
+     * Suggested to be equal to: 10*neighborhood_size
+     */
+    int starting_time = time(nullptr);
+    int L = 10 * problem->exams.size() * problem->timeslots;
 
-    problem->currentSolution = problem->bestSolution; // copy the entire solution if you delete it after
+    problem->currentSolution = new Solution(problem->bestSolution); // copy the entire solution if you delete it after
 
     for(int i = 0; ; ++i) {
+        Solution* neighbor = getNeighbor(problem);
+
         rand_probability = float(percent_distribution(generator)) / 100;
-
-        Solution* tempSolution = getNeighbor(problem);
-
-        //Formula used to calucalate probability:
-        // p^ = exp( -(F(x^) - F(x~))/T )
-        //where:
-        //F(x^) is the penalty of the candidate solution(the new one)
-        //F(x~) is the penalty of the current solution
-        //T is the 'cooling temperature'
-        //F(•) is the penalty function (or similar)
+        curr_probability = getCurrentProbability(problem, neighbor, T);
 
         //T should change only after some steps
         if (i % L == 0) {
             T = T * cooling_rate;
         }
 
-        double prob = getCurrentProbability(problem, tempSolution, T);
-
-        if (prob > rand_probability) {
-            problem->currentSolution = tempSolution;
+        if (rand_probability < curr_probability) {
+            delete problem->currentSolution;
+            problem->currentSolution = neighbor;
             problem->handleNewSolution(problem->currentSolution);
-        } else {
-            delete tempSolution;
         }
 
     }

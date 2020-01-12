@@ -37,6 +37,7 @@ public:
     bool getCutFeasibility(int minCut, int maxCut);
     void initializeRandomSolution(bool feasible = false, bool improved_solution = false);
     void initializeRandomFeasibleSolution();
+
     void moveExam(Exam* exam, int new_timeslot);
 
     double getPenalty();
