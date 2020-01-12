@@ -10,6 +10,9 @@
 
 /* Solution class */
 
+
+Solution::Solution(Solution *solution) : Solution(solution->exams, solution->timeslots, solution->students, solution->examsTimeslots) {}
+
 Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents) {
 
     /* Store collection length */
@@ -22,7 +25,7 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
 
 }
 
-Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution){
+Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, const int *initializingSolution){
 
     /* Store collection length */
     exams = examsVector;

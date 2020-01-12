@@ -28,8 +28,9 @@ public:
     std::vector<Exam*> examsAlreadyPlaced;
 
     /* Constructor */
+    explicit Solution(Solution* solution);
     Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents);
-    Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution);
+    Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, const int *initializingSolution);
 
     /* Feasibility checker */
     bool getFeasibility(bool evaluatePenalty = true, int start = 0, int end = 0);

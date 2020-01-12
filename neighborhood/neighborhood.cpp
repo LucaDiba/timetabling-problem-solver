@@ -6,36 +6,33 @@ void neighborhood(Problem* problem, int max_neighborhood_time) {
 }
 
 Solution* getNeighbor(Problem* problem) {
-    Solution* neighbor = problem->currentSolution;
+    Solution* neighbor;
 
-    std::uniform_int_distribution<int> examsDistribution(0, problem->exams.size());
-    std::uniform_int_distribution<int> timeslotsDistribution(0, problem->timeslots);
+    std::uniform_int_distribution<int> examsDistribution(0, problem->exams.size() -1);
+    std::uniform_int_distribution<int> timeslotsDistribution(0, problem->timeslots -1);
 
-    bool found = false;
-    while (!found) {
-        Solution* temp = neighbor;
+    while ( true ) {
+        auto* temp = new Solution(problem->currentSolution);
 
         // Extract a random exam and a random slot to mutate
-        int mutant_exam = examsDistribution(generator);
-        int current_slot = neighbor->examsTimeslots[mutant_exam];
-        int mutant_slot = (current_slot + int(problem->timeslots / 2)) % problem->timeslots;
-        
-        temp->moveExam((*temp->exams)[mutant_exam], mutant_slot);
+        int mutant_exam_id = examsDistribution(generator);
+        Exam* mutant_exam = problem->exams[mutant_exam_id];
 
-        if(temp->getPenalty() > neighbor->getPenalty()){
-            neighbor = temp;
-            found = true;
+        int current_slot = problem->currentSolution->examsTimeslots[mutant_exam_id];
+//        int mutant_slot = (current_slot + int(problem->timeslots / 2)) % problem->timeslots;
+        int mutant_slot = timeslotsDistribution(generator);
 
-            printf("%f\n", temp->getPenalty());
-            printf("%f\n", neighbor->getPenalty());
-            printf("%f\n", problem->currentSolution->getPenalty());
-            printf("%f\n", problem->bestSolution->getPenalty());
-            exit(0);
+        // TODO: check if the exam has no conflict with all the other exams in that timeslot before computing everything
+
+        temp->moveExam(mutant_exam, mutant_slot);
+
+        if(temp->getPenalty() < problem->currentSolution->getPenalty()){
+            return temp;
+        } else {
+            delete temp;
         }
 
     }
-
-    return neighbor;
 }
 
 double getCurrentProbability(Problem* problem, Solution* sol, double T) {
