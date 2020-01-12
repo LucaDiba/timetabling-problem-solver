@@ -37,9 +37,8 @@ int *Chromosome::getGenes() {
 
 }
 
-void Chromosome::mutation() {
-
-    // Random stuff
+void Chromosome::mutation(){
+    /*     // Random stuff
     std::uniform_int_distribution<int> probabilityDistribution(0, 100);
     std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size() - 1);
     std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots - 1);
@@ -57,7 +56,45 @@ void Chromosome::mutation() {
         // Store new timeslot for the random exam
         solution->examsTimeslots[mutantExam] = mutantSlot;
 
+    } */
+}
+
+Chromosome* Chromosome::mutation(Problem* problem) {
+
+    int MAX_TRIES = 10;
+
+    std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size() - 1);
+    std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots - 1);
+
+    Chromosome *child = new Chromosome(problem, (int*) getGenes());
+
+    bool swapped = false;
+
+    for(int i = 0; i < MAX_TRIES && !swapped; i++){
+        int examIndex1 = examsDistribution(generator);
+        int examIndex2;
+
+        do{
+            examIndex2 = examsDistribution(generator);
+        } while(examIndex1 == examIndex2);
+
+        Exam* exam1 = child->solution->exams->at(examIndex1);
+        Exam* exam2 = child->solution->exams->at(examIndex2);
+
+        int timeslot1 = exam1->timeslot;
+        int timeslot2 = exam2->timeslot;
+
+        double penalty = child->solution->calcPenaltyDelta(examIndex1, timeslot1, timeslot2) + child->solution->calcPenaltyDelta(examIndex2, timeslot2, timeslot1);
+        bool feasible = !exam1->evaluateConflicts(child->solution->exams, timeslot2) && !exam2->evaluateConflicts(child->solution->exams, timeslot1);
+
+        if(feasible && penalty < 0){
+            child->solution->moveExam(exam1, timeslot2);
+            child->solution->moveExam(exam1, timeslot2);
+            swapped = true;
+        }
     }
+
+    return child;
 
 }
 
@@ -151,7 +188,46 @@ void performOrderedCrossover(Chromosome *firstParent, Chromosome *secondParent, 
 
 }
 
-std::vector<Chromosome*> Chromosome::crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent, bool ordered) {
+Chromosome* Chromosome::crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent) {
+
+    std::uniform_int_distribution<int> timeslotDistribution(0, problem->timeslots - 1);
+    int randomTimeslot = timeslotDistribution(generator);
+
+    while(secondParent->solution->timeslotsExams[randomTimeslot].empty()){
+        randomTimeslot = timeslotDistribution(generator);
+    }
+
+    std::uniform_int_distribution<int> examDistribution(0, secondParent->solution->timeslotsExams[randomTimeslot].size() - 1);
+    int randomExamIndex = examDistribution(generator);
+    int randomExam =  secondParent->solution->timeslotsExams[randomTimeslot][randomExamIndex];
+
+    int correspondentTimeslot_parent1 = firstParent->solution->examsTimeslots[randomExam];
+
+    double penaltyDelta = 0;
+
+    for(int exam : secondParent->solution->timeslotsExams[randomTimeslot]){
+        int timeslotSrc = firstParent->solution->examsTimeslots[exam];
+
+        if(timeslotSrc != correspondentTimeslot_parent1)
+            penaltyDelta += firstParent->solution->calcPenaltyDelta(randomExam, timeslotSrc, correspondentTimeslot_parent1);
+    }
+
+    Chromosome *firstChild = new Chromosome(problem, (int*) firstParent->getGenes());
+    if(penaltyDelta < 0){
+        
+        for(int exam : secondParent->solution->timeslotsExams[randomTimeslot]){
+            int timeslotSrc = firstParent->solution->examsTimeslots[exam];
+            Exam* examObj = firstChild->solution->exams->at(exam);
+
+            if(timeslotSrc != correspondentTimeslot_parent1 && !examObj->evaluateConflicts(firstChild->solution->exams, correspondentTimeslot_parent1))
+                firstChild->solution->moveExam(firstChild->solution->exams->at(exam), correspondentTimeslot_parent1);
+        }
+    }
+
+    return firstChild;
+}
+
+/* std::vector<Chromosome*> Chromosome::crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent, bool ordered) {
 
     // Children collection
     std::vector<Chromosome*> children;
@@ -190,7 +266,7 @@ std::vector<Chromosome*> Chromosome::crossover(Problem* problem, Chromosome *fir
 
     return children;
 
-}
+} */
 
 Chromosome *Chromosome::inversion(Problem* problem) {
 

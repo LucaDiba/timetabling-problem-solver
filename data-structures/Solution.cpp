@@ -46,6 +46,8 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
         /* Add exam to its timeslot */
         timeslotsExams[examsTimeslots[i]].push_back(i);
 
+        exams->at(i)->timeslot = initializingSolution[i];
+
     }
 
 };
@@ -84,7 +86,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
     /* OLD ONE - recheck */
 
     /* Populate timeslots/exam vector of lists */
-    for(int i = start; i < (end > 0 ? end : exams->size()); i++)
+/*     for(int i = start; i < (end > 0 ? end : exams->size()); i++)
         exams->at(i)->timeslot = examsTimeslots[i];
 
     for(int i = start; i < (end > 0 ? end : exams->size()) && isFeasible; i++)
@@ -95,8 +97,15 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
     else if(evaluatePenalty)
         penalty = getPenalty();
 
-    return isFeasible;
+    return isFeasible; */
 
+}
+
+bool clearExamVector(std::vector<Exam*> *vector){
+    for (Exam *e : *vector)
+        delete e;
+
+    vector->clear();
 }
 
 bool Solution::getCutFeasibility(int minCut, int maxCut) {
@@ -107,9 +116,6 @@ bool Solution::getCutFeasibility(int minCut, int maxCut) {
 }
 
 void Solution::initExamsNotPlaced(std::vector<Exam*> sortedExams) {
-
-    examsNotPlaced.clear();
-    examsAlreadyPlaced.clear();
 
     for(int i = 0; i < exams->size(); i++){
         Exam* exam = sortedExams[i]->copy();
@@ -285,6 +291,9 @@ void Solution::initializeRandomFeasibleSolution(){
             } else if (imStuck++ == STUCK) {
                 imStuck = 0;
                 timeslotGroup = 0;
+                clearExamVector(&sortedExams);
+                clearExamVector(&examsNotPlaced);
+                clearExamVector(&examsAlreadyPlaced);
                 sortedExams = organizeExams();
                 initExamsNotPlaced(sortedExams);
                 timeslotGroups = initializeTimeslotGroups();
@@ -392,6 +401,24 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
 
 }
 
+double Solution::calcPenaltyDelta(int exam, int timeslotSrc, int timeslotDest){
+    double totalPenalty = 0;
+
+    for(int i = 0; i < exams->size(); ++i){
+        int timeslotsDistance = abs(timeslotDest - examsTimeslots[i]);
+        if(timeslotsDistance <= 5 && (*exams)[exam]->hasConflict(i))
+            totalPenalty += pow(2, (5 - timeslotsDistance)) * (*exams)[exam]->getConflict(i);
+    }
+
+    for(int j = 0; j < exams->size(); ++j){
+        int timeslotsDistance = abs(timeslotSrc - examsTimeslots[j]);
+        if(timeslotsDistance <= 5 && (*exams)[exam]->hasConflict(j))
+            totalPenalty -= pow(2, (5 - timeslotsDistance)) * (*exams)[exam]->getConflict(j);
+    }
+
+    return totalPenalty;
+}
+
 double Solution::computePenalty() {
 
     double totalPenalty = 0;
@@ -443,5 +470,7 @@ void Solution::moveExam(Exam *exam, int new_timeslot) {
     /* Change the timeslot assigned to the exam */
     examsTimeslots[exam->index] = new_timeslot;
 
-    computePenalty();
+    exam->timeslot = new_timeslot;
+
+    //computePenalty();
 }

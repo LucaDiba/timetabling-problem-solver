@@ -40,13 +40,18 @@ bool Exam::hasConflict(int examIndex) {
     return (conflicts.find(examIndex) != conflicts.end());
 }
 
-bool Exam::evaluateConflicts(std::vector<Exam*> *exams) {
+bool Exam::evaluateConflicts(std::vector<Exam*> *exams, int destTimeslot) {
 
     int e = 0;
     bool thisHasConflict = false;
 
-    while(!thisHasConflict)
-        thisHasConflict = (timeslot != exams->at(conflicts[e++])->timeslot);
+    for(auto& conflict : conflicts){
+        if(conflict.second > 0)
+            thisHasConflict = (destTimeslot == exams->at(conflict.first)->timeslot);
+
+        if(thisHasConflict)
+            break;
+    }
 
     return thisHasConflict;
 

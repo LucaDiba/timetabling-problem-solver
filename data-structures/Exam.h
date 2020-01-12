@@ -19,7 +19,7 @@ public:
     int getConflict(int examId);
     int getConflicts();
     bool hasConflict(int examId);
-    bool evaluateConflicts(std::vector<Exam*> *exams);
+    bool evaluateConflicts(std::vector<Exam*> *exams, int destTimeslot);
     void printAllConflicts(std::vector<Exam*> *exams, bool useIndex = false);
     Exam* copy();
 
