@@ -101,7 +101,7 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
 
 }
 
-bool clearExamVector(std::vector<Exam*> *vector){
+void clearExamVector(std::vector<Exam*> *vector){
     for (Exam *e : *vector)
         delete e;
 
@@ -211,11 +211,12 @@ bool Solution::tryRandomPlacement(Exam* examToBePlaced, std::vector<int> timeslo
 
 void Solution::computeRandomSchedule(std::vector<int> timeslotsAvailable) {
     Exam* examToBePlaced;
+
     int i = 0;
-    // I iterate on the exams that still have to be placed
+    
     while (!examsNotPlaced.empty() && i < examsNotPlaced.size()) {
         examToBePlaced = examsNotPlaced[i];
-        // If i didn't manage to place the exam in the available number of tries, I pass to the swap/move phase
+
         if (!tryRandomPlacement(examToBePlaced, timeslotsAvailable)) {
             i++;
             break;
@@ -233,6 +234,7 @@ bool Solution::randomMove(std::vector<int> timeslotsAvailable) {
 
     int oldTimeslot = examToBeMoved->timeslot;
     int timeslot = timeslotDistribution(generator);
+
     while(oldTimeslot == timeslot)
         timeslot = timeslotDistribution(generator);
 
@@ -258,13 +260,12 @@ void Solution::initSolution(){
 }
 
 void Solution::initializeRandomFeasibleSolution(){
-    int MOVE_TRIES = timeslots;
-    int PLACING_TRIES = 2 * timeslots;
     int THRESHOLD = 1;
     int STUCK = 2;
 
     std::vector<Exam*> sortedExams = organizeExams();
     initExamsNotPlaced(sortedExams);
+
     std::vector<std::vector<int>> timeslotGroups = initializeTimeslotGroups();
 
     int tries = 0, imStuck = 0, timeslotGroup = 0;
@@ -289,6 +290,7 @@ void Solution::initializeRandomFeasibleSolution(){
                 timeslotsAvailable.insert(timeslotsAvailable.end(), timeslotGroups[timeslotGroup].begin(), timeslotGroups[timeslotGroup].end());
                 timeslotGroup++;
             } else if (imStuck++ == STUCK) {
+                // Restart
                 imStuck = 0;
                 timeslotGroup = 0;
                 clearExamVector(&sortedExams);
@@ -309,7 +311,7 @@ void Solution::initializeRandomFeasibleSolution(){
     //printf("Generated feasible solution \n");
 }
 
-void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
+/* void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
 
     if(feasible) {
 
@@ -334,7 +336,7 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
 
             std::fill(tmp_examsTimeslots.begin(), tmp_examsTimeslots.end(), -1);
 
-            /* Initialize timeslots/exams vector */
+            // Initialize timeslots/exams vector 
             std::vector<std::vector<int>> tmp_timeslotsExams;
             tmp_timeslotsExams.reserve(timeslots);
             for(int i = 0; i < timeslots; ++i)
@@ -369,20 +371,20 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
         }
 
 
-        /* Initialize timeslots/exams vector */
+        // Initialize timeslots/exams vector 
         timeslotsExams.clear();
         for(int i = 0; i < timeslots; i++) {
             timeslotsExams.emplace_back(std::vector<int>());
         }
 
-        /* Generate collections for exams/timeslots mapping and vice-versa */
+        // Generate collections for exams/timeslots mapping and vice-versa 
         examsTimeslots = new int[exams->size()];
         for(int i = 0; i < exams->size(); ++i) {
 
-            /* Copy exam's timeslot */
+            // Copy exam's timeslot 
             examsTimeslots[i] = tmp_examsTimeslots[i];
 
-            /* Add exam to its timeslot */
+            // Add exam to its timeslot 
             timeslotsExams[examsTimeslots[i]].push_back(i);
 
         }
@@ -399,7 +401,7 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
     }
 
 
-}
+} */
 
 double Solution::calcPenaltyDelta(int exam, int timeslotSrc, int timeslotDest){
     double totalPenalty = 0;

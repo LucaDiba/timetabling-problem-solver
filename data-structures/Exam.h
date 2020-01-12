@@ -21,6 +21,8 @@ public:
     bool hasConflict(int examId);
     bool evaluateConflicts(std::vector<Exam*> *exams, int destTimeslot);
     void printAllConflicts(std::vector<Exam*> *exams, bool useIndex = false);
+
+    /* Clone instance */
     Exam* copy();
 
 };
