@@ -2,8 +2,6 @@
 #include <string>
 
 #include <random>
-#include <functional>
-
 std::mt19937 generator;
 
 #include "data-structures/Problem.h"
@@ -14,8 +12,14 @@ std::mt19937 generator;
 int main(int argc, char * argv[]) {
 
     std::string instance_name = argv[1];
+    std::string command = argv[2];
+
+    if(command != "-t"){
+        printf("Invalid argument");
+        return 0;
+    }
+
     int max_time = atoi(argv[3]);
-    printf("max time: %d\n", max_time);
 
 
     int max_multistart_time = int(max_time * 0.8);
