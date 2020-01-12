@@ -14,7 +14,8 @@ Chromosome::Chromosome(Problem* problem, bool improved_solution) {
     mutationRate = mutRate;
 
     solution = new Solution(&(problem->exams), problem->timeslots, problem->students);
-    solution->initializeRandomSolution(true, improved_solution);
+    //solution->initializeRandomSolution(true, improved_solution);
+    solution->initializeRandomFeasibleSolution();
 
 }
 
@@ -212,6 +213,35 @@ Chromosome *Chromosome::inversion(Problem* problem) {
     return invertedChromosome;
 
 }
+
+Chromosome *Chromosome::timeslot_inversion(Problem* problem) {
+
+    // Random stuff
+    std::uniform_int_distribution<int> cutDistribution(0, solution->timeslots - 1);
+
+    //Decide how many cuts will be according with the number of timeslot
+    int t1 = cutDistribution(generator);
+    int t2 = cutDistribution(generator);
+
+    while(t1 == t2)
+        t2 = cutDistribution(generator);
+
+    //Copy old genes and store solution pointer
+    Chromosome *invertedChromosome = new Chromosome(problem, (int*) getGenes());
+
+    for(int examId : solution->timeslotsExams[t1]){
+        Exam *e = invertedChromosome->solution->exams->at(examId);
+        invertedChromosome->solution->moveExam(e, t2);
+    }
+    for(int examId : solution->timeslotsExams[t2]){
+        Exam *e = invertedChromosome->solution->exams->at(examId);
+        invertedChromosome->solution->moveExam(e, t1);
+    }
+
+    return invertedChromosome;
+
+}
+
 
 //The fitness is calculated as an integer between 0 and nofGenes
 double Chromosome::getFitness() {

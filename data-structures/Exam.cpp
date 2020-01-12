@@ -21,6 +21,17 @@ void Exam::setConflict(int conflictingExamIndex) {
 
 }
 
+int Exam::getConflicts(){
+    int i = 0;
+
+    for(auto& conflict : conflicts){
+        if(conflict.second > 0)
+            i++;
+    }
+
+    return i;
+}
+
 int Exam::getConflict(int examIndex) {
     return conflicts[examIndex];
 }
@@ -48,4 +59,15 @@ void Exam::printAllConflicts(std::vector<Exam*> *exams, bool useIndex) {
     for(auto& conflictingExam : conflicts)
         printf("%d ", useIndex ? exams->at(conflictingExam.first)->index : exams->at(conflictingExam.first)->id);
 
+}
+
+Exam* Exam::copy(){
+    Exam* exam = new Exam(id, index, enrolledStudents);
+    exam->timeslot = timeslot;
+
+    for(auto& conflict : conflicts){
+        exam->conflicts[conflict.first] = conflict.second;
+    }
+
+    return exam;
 }
