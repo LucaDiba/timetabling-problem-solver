@@ -10,6 +10,9 @@
 
 /* Solution class */
 
+
+Solution::Solution(Solution *solution) : Solution(solution->exams, solution->timeslots, solution->students, solution->examsTimeslots) {}
+
 Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents) {
 
     /* Store collection length */
@@ -22,7 +25,7 @@ Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int n
 
 }
 
-Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution){
+Solution::Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, const int *initializingSolution){
 
     /* Store collection length */
     exams = examsVector;
@@ -103,6 +106,200 @@ bool Solution::getCutFeasibility(int minCut, int maxCut) {
 
 }
 
+void Solution::initExamsNotPlaced(std::vector<Exam*> sortedExams) {
+
+    examsNotPlaced.clear();
+    examsAlreadyPlaced.clear();
+
+    for(int i = 0; i < exams->size(); i++){
+        Exam* exam = sortedExams[i]->copy();
+        examsNotPlaced.push_back(exam);
+    }
+
+}
+
+std::vector<Exam*> Solution::organizeExams(){
+
+    std::vector<Exam*> sortedExams;
+
+    for(int i = 0; i < exams->size(); i++){
+        Exam* exam = exams->at(i)->copy();
+        sortedExams.push_back(exam);
+    }
+
+    std::sort(sortedExams.begin(), sortedExams.end(), [](Exam *one, Exam *two) {
+        return one->getConflicts() > two->getConflicts();
+    });
+
+    for(int i = 0; i < (sortedExams.size()/5); i++){
+        std::random_shuffle(sortedExams.begin() + (5 * i), sortedExams.begin() + ((i + 1) * 5));
+    }
+
+    return sortedExams;
+}
+
+std::vector<std::vector<int>> Solution:: initializeTimeslotGroups(){
+
+    std::vector<std::vector<int>> timeslotsGroups;
+    std::vector<int> randomSequence(6);
+
+    for(int i = 0; i < 6; i++)
+        randomSequence[i] = i;
+    
+    std::shuffle(randomSequence.begin(), randomSequence.end(), generator);
+
+    for(int i = 0; i < 6; i++){
+
+        timeslotsGroups.emplace_back(std::vector<int>());
+
+        int timeslot = randomSequence[i];
+
+        while (timeslot < timeslots){
+            timeslotsGroups[i].push_back(timeslot);
+            timeslot += 6;
+        }
+    }
+
+    return timeslotsGroups;
+}
+
+bool Solution::isMoveFeasible(Exam* examToBePlaced, int timeslot){
+
+    // Scroll all exams in the current timeslot
+    for (int k = 0; k < timeslotsExams[timeslot].size(); ++k) {
+        int curr_exam_in_timeslot = timeslotsExams[timeslot][k];
+
+        if(examToBePlaced->hasConflict(curr_exam_in_timeslot)) {
+            return false;
+        }
+    }
+
+    examToBePlaced->timeslot = timeslot;
+    examsTimeslots[examToBePlaced->index] = timeslot;
+    timeslotsExams[timeslot].emplace_back(examToBePlaced->index);
+
+    return true;
+}
+
+bool Solution::randomPlacement(Exam* examToBePlaced, std::vector<int> timeslotsAvailable) {
+
+    std::uniform_int_distribution<int> distribution(0, timeslotsAvailable.size() - 1);
+    int randomIndex = distribution(generator);
+    int destination = timeslotsAvailable[randomIndex];
+
+    return isMoveFeasible(examToBePlaced, destination);
+}
+
+bool Solution::tryRandomPlacement(Exam* examToBePlaced, std::vector<int> timeslotsAvailable) {
+    int PLACING_TRIES = 2 * timeslots;
+
+    for (int k = 0; k < PLACING_TRIES; k++) {
+        if (randomPlacement(examToBePlaced, timeslotsAvailable)) {
+            examsNotPlaced.erase(std::remove(examsNotPlaced.begin(), examsNotPlaced.end(), examToBePlaced), examsNotPlaced.end());
+            examsAlreadyPlaced.emplace_back(examToBePlaced);
+            return true;
+        }
+    }
+    return false;
+}
+
+void Solution::computeRandomSchedule(std::vector<int> timeslotsAvailable) {
+    Exam* examToBePlaced;
+    int i = 0;
+    // I iterate on the exams that still have to be placed
+    while (!examsNotPlaced.empty() && i < examsNotPlaced.size()) {
+        examToBePlaced = examsNotPlaced[i];
+        // If i didn't manage to place the exam in the available number of tries, I pass to the swap/move phase
+        if (!tryRandomPlacement(examToBePlaced, timeslotsAvailable)) {
+            i++;
+            break;
+        }
+    }
+}
+
+bool Solution::randomMove(std::vector<int> timeslotsAvailable) {
+
+    std::uniform_int_distribution<int> examDistribution(0, examsAlreadyPlaced.size() - 1);
+    std::uniform_int_distribution<int> timeslotDistribution(0, timeslots - 1);
+
+    int examIndex = examDistribution(generator);
+    Exam* examToBeMoved = examsAlreadyPlaced[examIndex];
+
+    int oldTimeslot = examToBeMoved->timeslot;
+    int timeslot = timeslotDistribution(generator);
+    while(oldTimeslot == timeslot)
+        timeslot = timeslotDistribution(generator);
+
+    bool result = isMoveFeasible(examToBeMoved, timeslot);
+
+    if(result)
+        timeslotsExams[oldTimeslot].erase(std::remove(timeslotsExams[oldTimeslot].begin(), timeslotsExams[oldTimeslot].end(), examToBeMoved->index), timeslotsExams[oldTimeslot].end());
+
+    return result;
+}
+
+void Solution::initSolution(){
+    /* Initialize timeslots/exams vector */
+    timeslotsExams.clear();
+    timeslotsExams.shrink_to_fit();
+
+    for(int i = 0; i < timeslots; i++) {
+        timeslotsExams.emplace_back(std::vector<int>());
+    }
+
+    /* Generate collections for exams/timeslots mapping and vice-versa */
+    examsTimeslots = new int[exams->size()];
+}
+
+void Solution::initializeRandomFeasibleSolution(){
+    int MOVE_TRIES = timeslots;
+    int PLACING_TRIES = 2 * timeslots;
+    int THRESHOLD = 1;
+    int STUCK = 2;
+
+    std::vector<Exam*> sortedExams = organizeExams();
+    initExamsNotPlaced(sortedExams);
+    std::vector<std::vector<int>> timeslotGroups = initializeTimeslotGroups();
+
+    int tries = 0, imStuck = 0, timeslotGroup = 0;
+
+    std::vector<int> timeslotsAvailable = timeslotGroups[timeslotGroup++];
+
+    initSolution();
+
+    while (!examsNotPlaced.empty()) {
+        computeRandomSchedule(timeslotsAvailable);
+        // I try to move randomly, until I manage to do it.
+
+        bool randomFeasibleMove = false;
+
+        while(!randomMove(timeslotsAvailable));
+
+        tries++;
+        // If I'm above the threshold
+        if (tries > THRESHOLD) {
+            // I try to expand my current bucket with a new one.
+            if (timeslotGroup < 6) {
+                timeslotsAvailable.insert(timeslotsAvailable.end(), timeslotGroups[timeslotGroup].begin(), timeslotGroups[timeslotGroup].end());
+                timeslotGroup++;
+            } else if (imStuck++ == STUCK) {
+                imStuck = 0;
+                timeslotGroup = 0;
+                sortedExams = organizeExams();
+                initExamsNotPlaced(sortedExams);
+                timeslotGroups = initializeTimeslotGroups();
+                initSolution();
+                THRESHOLD++;
+                timeslotsAvailable = timeslotGroups[timeslotGroup++];
+            }
+            tries = 0;
+
+        } 
+    }
+
+    //printf("Generated feasible solution \n");
+}
+
 void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
 
     if(feasible) {
@@ -111,6 +308,7 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
         std::vector<int> tmp_examsTimeslots(exams->size());
         std::vector<int> shuffled_exams(exams->size());
         std::vector<int> shuffled_timeslots(timeslots);
+        std::vector<Exam*> sortedExams = organizeExams();
 
         for (int i = 0; i < exams->size() || i < timeslots; ++i) {
 
@@ -123,7 +321,6 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
         }
 
         while(found_infeasibility) {
-
             found_infeasibility = false;
 
             std::fill(tmp_examsTimeslots.begin(), tmp_examsTimeslots.end(), -1);
@@ -135,14 +332,12 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
                 tmp_timeslotsExams.emplace_back(std::vector<int>());
 
             std::shuffle(std::begin(shuffled_exams), std::end(shuffled_exams), generator);
+            std::shuffle(std::begin(shuffled_timeslots), std::end(shuffled_timeslots), generator);
 
             // For each exam
             for (int i = 0; i < shuffled_exams.size() && !found_infeasibility; ++i){
                 int curr_exam = shuffled_exams[i];
 
-//                if (improved_solution)
-//                    std::shuffle(std::begin(shuffled_timeslots), std::end(shuffled_timeslots), generator);
-                
                 // Search for a timeslot until you find one with no conflicts
                 for (int j = 0; j < timeslots && tmp_examsTimeslots[curr_exam] == -1; ++j) {
                     int curr_timeslot = shuffled_timeslots[j];
@@ -193,6 +388,7 @@ void Solution::initializeRandomSolution(bool feasible, bool improved_solution) {
             examsTimeslots[i] = distribution(generator);
         }
     }
+
 
 }
 

@@ -1,92 +1,92 @@
 #include "neighborhood.h"
+#include "../data-structures/rand.h"
 
 void neighborhood(Problem* problem, int max_neighborhood_time) {
-simulatedAnnealing(problem, max_neighborhood_time);
+    simulatedAnnealing(problem, max_neighborhood_time);
 }
 
-Solution* getNeighbor(Solution* current_solution) {
-    Solution* neighbor = current_solution;
+Solution* getNeighbor(Problem* problem) {
+    Solution* neighbor;
 
-    //Execute First Improvement or pick a new random Solution
-    bool found = false, FI = true;
-    while (!found) {
-        Solution* temp = neighbor;
+    std::uniform_int_distribution<int> examsDistribution(0, problem->exams.size() -1);
+    std::uniform_int_distribution<int> timeslotsDistribution(0, problem->timeslots -1);
 
-        //Compiute changes:
-        // Random stuff
-        std::random_device device;
-        std::mt19937 generator(device());
-        std::uniform_int_distribution<int> examsDistribution(0, temp->exams->size());
-        std::uniform_int_distribution<int> timeslotsDistribution(0, temp->timeslots);
+    while ( true ) {
+        auto* temp = new Solution(problem->currentSolution);
 
         // Extract a random exam and a random slot to mutate
-        int mutantExam = examsDistribution(generator);
-        int mutantSlot = timeslotsDistribution(generator);
+        int mutant_exam_id = examsDistribution(generator);
+        Exam* mutant_exam = problem->exams[mutant_exam_id];
 
-        // Store new timeslot for the random exam
-        temp->examsTimeslots[mutantExam] = mutantSlot;
+        int current_slot = temp->examsTimeslots[mutant_exam_id];
+        int mutant_slot;
+        do{
+            mutant_slot = timeslotsDistribution(generator);
+        } while( mutant_slot == current_slot );
 
-        //Check if the new solution is better the the previous one (First Improvement)
-        if(FI){
-            if(temp->getPenalty() > neighbor->getPenalty()){
-                neighbor = temp;
-                found = true;
+        /* Check if the exam has no conflict with all the other exams in that timeslot */
+        bool feasible = true;
+        for (int tmp_exam_id : temp->timeslotsExams[mutant_slot]) {
+            if(mutant_exam->hasConflict(tmp_exam_id)) {
+                feasible = false;
+                break;
             }
         }
-            //Accept any solution (Random)
-        else{
-            neighbor = temp;
-            found = true;
+
+        if(feasible){
+            temp->moveExam(mutant_exam, mutant_slot);
+            return temp;
         }
 
     }
+}
 
-    return neighbor;
+double getCurrentProbability(Problem* problem, Solution* candidate_solution, double T) {
+    return exp( -(candidate_solution->getPenalty() - problem->currentSolution->getPenalty()) / T );
 }
 
 void simulatedAnnealing(Problem* problem, int max_neighborhood_time) {
     // Initial solution: problem->current_solution
-    float rand_probability;
+    std::uniform_int_distribution<int> percent_distribution(0, 100);
+    double rand_probability, curr_probability;
 
-    //T_zero should be a number such that: exp( -(F(x^) - F(x~))/T_zero ) = 0.5
-    //On internet, someone set T to a high number, something like 1000
-    //max t=180/300 seconds. 60%t to multistart, remaining ~108/180s for neighborhood
-    double t_zero = 5 * max_neighborhood_time;
-    double T = t_zero;
-    //cooling_rate = [0,1]. Should be near 1, something like 0.99
-    //set it to a smaller value will speed up the process but it may skip best solutions
-    double cooling_rate = 0.80 + max_neighborhood_time % 10;
-    //(Plateau) Number of iterations after which temperature T can be changed
-    int L = 5;
+    /* T_zero should be a number such that: exp( -(F(x^) - F(x~))/T_zero ) = 0.5
+     * On internet, someone set T to a high number, something like 1000
+     * max t=180/300 seconds. 60%t to multistart, remaining ~108/180s for neighborhood
+     */
+    double neighborhood_avg_penalty = problem->bestSolution->getPenalty() * 1.1;
+    double T_zero = - (neighborhood_avg_penalty - problem->bestSolution->getPenalty()) / log(0.5);
 
-    Solution* best_solution;
-    //Solution coming from the multistart process
-    Solution* current_solution = problem->bestSolution;
+    double T = T_zero;
 
-    for(int i=0;;i++) {
-        rand_probability = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    /* cooling_rate = [0,1]. Should be near 1, something like 0.99
+     * set it to a smaller value will speed up the process but it may skip best solutions
+     */
+    double cooling_rate = 0.99;
 
-        Solution* temp_solution = getNeighbor(current_solution);
+    /* (Plateau) Number of iterations after which temperature T can be changed
+     * Suggested to be equal to: 10*neighborhood_size
+     */
+    int starting_time = time(nullptr);
+    int L = 10 * problem->exams.size() * problem->timeslots;
 
-        //Formula used to calucalate probability:
-        // p^ = exp( -(F(x^) - F(x~))/T )
-        //where:
-        //F(x^) is the penalty of the candidate solution(the new one)
-        //F(x~) is the penalty of the current solution
-        //T is the 'cooling temperature'
-        //F(•) is the penalty function (or similar)
+    problem->currentSolution = new Solution(problem->bestSolution); // copy the entire solution if you delete it after
+
+    for(int i = 0; ; ++i) {
+        Solution* neighbor = getNeighbor(problem);
+
+        rand_probability = float(percent_distribution(generator)) / 100;
+        curr_probability = getCurrentProbability(problem, neighbor, T);
 
         //T should change only after some steps
-        if (i%L==0) {
+        if (i % L == 0) {
             T = T * cooling_rate;
         }
 
-        double prob = exp( -(temp_solution->getPenalty() - current_solution->getPenalty())/T );
-
-        if(prob > rand_probability){
-            current_solution = temp_solution;
-            //Update best solution if the new solution has an higher score
-            problem->handleNewSolution(best_solution);
+        if (rand_probability < curr_probability) {
+            delete problem->currentSolution;
+            problem->currentSolution = neighbor;
+            problem->handleNewSolution(problem->currentSolution);
         }
 
     }

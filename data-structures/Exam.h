@@ -17,9 +17,11 @@ public:
     /* Conflict handling */
     void setConflict(int conflictingExamId);
     int getConflict(int examId);
+    int getConflicts();
     bool hasConflict(int examId);
     bool evaluateConflicts(std::vector<Exam*> *exams);
     void printAllConflicts(std::vector<Exam*> *exams, bool useIndex = false);
+    Exam* copy();
 
 };
 

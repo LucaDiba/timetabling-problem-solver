@@ -25,6 +25,8 @@ void generateInitialPopulation(Problem* problem) {
         max_penalty = (tmp_penalty > max_penalty) ? tmp_penalty : max_penalty;
         sum_penalty += tmp_penalty;
 
+        problem->handleNewSolution(c->solution);
+
     }
 
     printf("Random starting solution statistics:\n");
@@ -94,18 +96,23 @@ void evolvePopulation(Problem* problem) {
     }
 
     // (c) Crossover between any Chromosomes
-    for (int j = c_start; j <= c_stop; j++) {
+/*     for (int j = c_start; j <= c_stop; j++) {
         delete chromosomes[j];
         chromosomes[j] = chromosomes[j - p * 2]->inversion(problem);
         chromosomes[j]->mutation();
-    }
+    } */
 
+    for (int j = c_start; j <= d_stop; j++) {
+        delete chromosomes[j];
+        chromosomes[j] = chromosomes[j - p * 2]->timeslot_inversion(problem);
+    }
+    
     // (d) Generate new Chromosomes
-    for (int j = d_start; j <= d_stop; j++) {
+/*     for (int j = d_start; j <= d_stop; j++) {
         delete chromosomes[j];
         chromosomes[j] = new Chromosome(problem);
         chromosomes[j]->mutation();
-    }
+    } */
 }
 
 //void evolvePopulation(Problem* problem) {
@@ -196,7 +203,7 @@ int computePopulationSize(Problem* problem) {
     int problemSize = problem->exams.size();
 
     // TODO: Compute population size according to problem size or density
-    return problemSize * 1.5;
+    return 16;
 
 }
 
@@ -210,8 +217,9 @@ void multistart(Problem* problem, int maxTime) {
 
     // Generate initial population
     generateInitialPopulation(problem);
-
+    int i = 0;
     while(time(nullptr) < stoppingTime) {
+        printf("Generation %d \n", i++);
         evolvePopulation(problem);
     }
 

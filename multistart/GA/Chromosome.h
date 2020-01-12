@@ -43,6 +43,7 @@ public:
      * Swap genes
      */
     Chromosome *inversion(Problem* problem);
+    Chromosome *timeslot_inversion(Problem* problem);
 
     double getFitness();
 

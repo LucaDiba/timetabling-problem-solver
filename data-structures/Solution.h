@@ -24,20 +24,35 @@ public:
     /* Solution feasibility */
     bool isFeasible = true;
 
+    std::vector<Exam*> examsNotPlaced;
+    std::vector<Exam*> examsAlreadyPlaced;
+
     /* Constructor */
+    explicit Solution(Solution* solution);
     Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents);
-    Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, int *initializingSolution);
+    Solution(std::vector<Exam*> *examsVector, int numberOfTimeslots, int numberOfStudents, const int *initializingSolution);
 
     /* Feasibility checker */
     bool getFeasibility(bool evaluatePenalty = true, int start = 0, int end = 0);
     bool getCutFeasibility(int minCut, int maxCut);
     void initializeRandomSolution(bool feasible = false, bool improved_solution = false);
+    void initializeRandomFeasibleSolution();
+
     void moveExam(Exam* exam, int new_timeslot);
 
     double getPenalty();
     double getGain();
     void setPenalty(double new_penalty);
 
+    void initExamsNotPlaced(std::vector<Exam*> sortedExams);
+    std::vector<Exam*> organizeExams();
+    std::vector<std::vector<int>> initializeTimeslotGroups();
+    bool tryRandomPlacement(Exam* toBePlaced, std::vector<int> bucket);
+    void computeRandomSchedule(std::vector<int> bucket);
+    bool randomPlacement(Exam* toBePlaced, std::vector<int> bucket);
+    bool isMoveFeasible(Exam* toBePlaced, int timeslot);
+    bool randomMove(std::vector<int> bucket);
+    void initSolution();
 
     /**
      * Force re-computation of the penalty
