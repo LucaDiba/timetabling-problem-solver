@@ -25,6 +25,8 @@ void generateInitialPopulation(Problem* problem) {
         max_penalty = (tmp_penalty > max_penalty) ? tmp_penalty : max_penalty;
         sum_penalty += tmp_penalty;
 
+        problem->handleNewSolution(c->solution);
+
     }
 
     printf("Random starting solution statistics:\n");

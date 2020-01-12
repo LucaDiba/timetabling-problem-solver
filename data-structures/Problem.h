@@ -30,7 +30,7 @@ public:
     int students = 0;
 
     // Solutions for the current problem
-    //Solution* currentSolution;
+    Solution* currentSolution = nullptr;
     Solution* bestSolution = nullptr;
 
     // Solution handling

@@ -13,7 +13,7 @@
  * @param current_solution the solution where to start from
  * @return the neighbor solution
  */
-Solution* getNeighbor(Solution* current_solution);
+Solution* getNeighbor(Problem* problem, Solution* current_solution);
 
 /*
  * Execute Simulated Annealing algorithm on the given problem
