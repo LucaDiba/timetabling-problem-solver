@@ -16,11 +16,11 @@ Solution* getNeighbor(Problem* problem) {
         Solution* temp = neighbor;
 
         // Extract a random exam and a random slot to mutate
-        int mutantExam = examsDistribution(generator);
-        int mutantSlot = timeslotsDistribution(generator);
-
-        // Store new timeslot for the random exam
-        temp->examsTimeslots[mutantExam] = mutantSlot;
+        int mutant_exam = examsDistribution(generator);
+        int current_slot = neighbor->examsTimeslots[mutant_exam];
+        int mutant_slot = (current_slot + int(problem->timeslots / 2)) % problem->timeslots;
+        
+        temp->moveExam((*temp->exams)[mutant_exam], mutant_slot);
 
         if(temp->getPenalty() > neighbor->getPenalty()){
             neighbor = temp;
