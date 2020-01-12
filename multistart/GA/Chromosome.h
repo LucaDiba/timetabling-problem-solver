@@ -36,6 +36,7 @@ public:
      * Mutate one random gene, assigning to it one random timeslot, in order to diversify the search and avoid getting stuch in a local minimum
      * WARNING: FEASIBILITY NOT GUARANTEED!
      */
+    Chromosome* mutation(Problem* problem);
     void mutation();
     static Chromosome* crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent);
 

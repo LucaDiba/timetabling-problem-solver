@@ -98,6 +98,13 @@ bool Solution::getFeasibility(bool evaluatePenalty, int start, int end) {
 
 }
 
+bool clearExamVector(std::vector<Exam*> *vector){
+    for (Exam *e : *vector)
+        delete e;
+
+    vector->clear();
+}
+
 bool Solution::getCutFeasibility(int minCut, int maxCut) {
 
     // Evaluate only cutting section feasibility
@@ -106,9 +113,6 @@ bool Solution::getCutFeasibility(int minCut, int maxCut) {
 }
 
 void Solution::initExamsNotPlaced(std::vector<Exam*> sortedExams) {
-
-    examsNotPlaced.clear();
-    examsAlreadyPlaced.clear();
 
     for(int i = 0; i < exams->size(); i++){
         Exam* exam = sortedExams[i]->copy();
@@ -284,6 +288,9 @@ void Solution::initializeRandomFeasibleSolution(){
             } else if (imStuck++ == STUCK) {
                 imStuck = 0;
                 timeslotGroup = 0;
+                clearExamVector(&sortedExams);
+                clearExamVector(&examsNotPlaced);
+                clearExamVector(&examsAlreadyPlaced);
                 sortedExams = organizeExams();
                 initExamsNotPlaced(sortedExams);
                 timeslotGroups = initializeTimeslotGroups();

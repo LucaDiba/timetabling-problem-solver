@@ -37,9 +37,8 @@ int *Chromosome::getGenes() {
 
 }
 
-void Chromosome::mutation() {
-
-    // Random stuff
+void Chromosome::mutation(){
+    /*     // Random stuff
     std::uniform_int_distribution<int> probabilityDistribution(0, 100);
     std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size() - 1);
     std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots - 1);
@@ -57,7 +56,45 @@ void Chromosome::mutation() {
         // Store new timeslot for the random exam
         solution->examsTimeslots[mutantExam] = mutantSlot;
 
+    } */
+}
+
+Chromosome* Chromosome::mutation(Problem* problem) {
+
+    int MAX_TRIES = 10;
+
+    std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size() - 1);
+    std::uniform_int_distribution<int> timeslotsDistribution(0, solution->timeslots - 1);
+
+    Chromosome *child = new Chromosome(problem, (int*) getGenes());
+
+    bool swapped = false;
+
+    for(int i = 0; i < MAX_TRIES && !swapped; i++){
+        int examIndex1 = examsDistribution(generator);
+        int examIndex2;
+
+        do{
+            examIndex2 = examsDistribution(generator);
+        } while(examIndex1 == examIndex2);
+
+        Exam* exam1 = child->solution->exams->at(examIndex1);
+        Exam* exam2 = child->solution->exams->at(examIndex2);
+
+        int timeslot1 = exam1->timeslot;
+        int timeslot2 = exam2->timeslot;
+
+        double penalty = child->solution->calcPenaltyDelta(examIndex1, timeslot1, timeslot2) + child->solution->calcPenaltyDelta(examIndex2, timeslot2, timeslot1);
+        bool feasible = !exam1->evaluateConflicts(child->solution->exams, timeslot2) && !exam2->evaluateConflicts(child->solution->exams, timeslot1);
+
+        if(feasible && penalty < 0){
+            child->solution->moveExam(exam1, timeslot2);
+            child->solution->moveExam(exam1, timeslot2);
+            swapped = true;
+        }
     }
+
+    return child;
 
 }
 

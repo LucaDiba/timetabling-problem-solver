@@ -79,7 +79,7 @@ void evolvePopulation(Problem* problem) {
     int d_stop = populationSize - 1;
 
     // (b) Crossover between top Chromosomes
-    for (int j = b_start; j <= c_stop; j = j + 2) {
+    for (int j = b_start; j <= b_stop; j = j + 2) {
         // Generate offspring
         // Otherwise choose two random numbers in range [0,top_chromosomes)
         std::uniform_int_distribution<int> population_distribution(0, populationSize - 1);
@@ -108,6 +108,11 @@ void evolvePopulation(Problem* problem) {
         chromosomes[j] = chromosomes[j - p * 2]->inversion(problem);
         chromosomes[j]->mutation();
     } */
+
+    for (int j = c_start; j <= c_stop; j++) {
+        delete chromosomes[j];
+        chromosomes[j] = chromosomes[j - p * 2]->mutation(problem);
+    }
 
     for (int j = d_start; j <= d_stop; j++) {
         delete chromosomes[j];
@@ -214,7 +219,7 @@ int computePopulationSize(Problem* problem) {
     int problemSize = problem->exams.size();
 
     // TODO: Compute population size according to problem size or density
-    return 16;
+    return 20;
 
 }
 
