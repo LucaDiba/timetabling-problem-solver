@@ -13,7 +13,14 @@ std::mt19937 generator;
 int main(int argc, char * argv[]) {
 
     std::string instance_name = argv[1];
-    int max_time = atoi(argv[2]);
+    std::string command = argv[2];
+
+    if(command != "-t"){
+        printf("Invalid argument");
+        return 0;
+    }
+
+    int max_time = atoi(argv[3]);
 
 
     int max_multistart_time = int(max_time * 0.6);
