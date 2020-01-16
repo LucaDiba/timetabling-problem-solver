@@ -1,11 +1,11 @@
 # timetabling-problem-solver
 A C++ metaheuristics solver for the ETP (examination timetabling problem).
 
-# Data rappresentation
+# Data representation
 - Vector of exams: `v[i]` is the timeslot assigned to exam `i`
 - Vector of timeslots: `v[t]` is a list of exams scheduled on timeslot `t`
 
-# MH used
+# Metaheuristic
 ## 1. Multi-start: Genetic Algorithm
 
 Solution &rarr; chromosome  
