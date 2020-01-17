@@ -1,4 +1,6 @@
-# timetabling-problem-solver
+# Examination Timetabling Problem Solver
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A C++ metaheuristics solver for the ETP (examination timetabling problem).
 
 # Data representation
