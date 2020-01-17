@@ -8,7 +8,6 @@ int populationSize;
 std::vector<Chromosome*> chromosomes;
 
 void generateInitialPopulation(Problem* problem) {
-
     /* Statistics on generated solutions */ //TODO: remove for production for better performances
     double tmp_penalty;
     double min_penalty = std::numeric_limits<double>::max();
@@ -16,7 +15,6 @@ void generateInitialPopulation(Problem* problem) {
     double sum_penalty = 0;
 
     for (int i = 0; i < populationSize; i++) {
-
         Chromosome* c = new Chromosome(problem, true);
         chromosomes.push_back(c);
 
@@ -26,18 +24,15 @@ void generateInitialPopulation(Problem* problem) {
         sum_penalty += tmp_penalty;
 
         problem->handleNewSolution(c->solution);
-
     }
 
     printf("Random starting solution statistics:\n");
     printf("- Max penalty:  %f\n", max_penalty);
     printf("- Min penalty:  %f\n", min_penalty);
     printf("- Mean penalty: %f\n", sum_penalty / populationSize);
-
 }
 
 void sortPopulation(Problem* problem) {
-
     // Define a lambda to sort chromosomes
     std::sort(chromosomes.begin(), chromosomes.end(), [](Chromosome *one, Chromosome *two) {
         return one->solution->getPenalty() < two->solution->getPenalty();
@@ -45,11 +40,9 @@ void sortPopulation(Problem* problem) {
 
     // Evaluate new solution
     problem->handleNewSolution(chromosomes[0]->solution);
-
 }
 
 void evolvePopulation(Problem* problem) {
-
     // Sort the population in order to have easy access to the best chromosomes
     sortPopulation(problem);
 
@@ -117,21 +110,17 @@ void evolvePopulation(Problem* problem) {
         delete chromosomes[j];
         chromosomes[j] = chromosomes[j - p*2]->timeslot_inversion(problem);
     }
-
 }
 
 int computePopulationSize(Problem* problem) {
-
     // Source: https://www.researchgate.net/post/What_is_the_optimal_recommended_population_size_for_differential_evolution2
 
     // Get problem size
     int problemSize = problem->exams.size();
     return std::max(int(problemSize * 0.1), 10);
-
 }
 
 void multistart(Problem* problem, int maxTime) {
-
     int startingTime = time(nullptr);
     int stoppingTime = startingTime + maxTime;
 
@@ -158,5 +147,4 @@ void multistart(Problem* problem, int maxTime) {
 
         evolvePopulation(problem);
     }
-
 }

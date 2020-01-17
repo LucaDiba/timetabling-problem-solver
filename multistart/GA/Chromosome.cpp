@@ -10,31 +10,24 @@
 float mutRate = 0.8;
 
 Chromosome::Chromosome(Problem* problem, bool improved_solution) {
-
     mutationRate = mutRate;
 
     solution = new Solution(&(problem->exams), problem->timeslots, problem->students);
     //solution->initializeRandomSolution(true, improved_solution);
     solution->initializeRandomFeasibleSolution();
-
 }
 
 Chromosome::Chromosome(Problem* problem, int *initializingSolution) {
-
     mutationRate = mutRate;
-
     solution = new Solution(&problem->exams, problem->timeslots, problem->students, initializingSolution);
-
 }
 
 int *Chromosome::getGenes() {
-
     // Copy current genes
     int *genesCopy = new int[solution->exams->size()];
     std::copy(solution->examsTimeslots, solution->examsTimeslots + solution->exams->size(), genesCopy);
 
     return genesCopy;
-
 }
 
 void Chromosome::mutation(){
@@ -60,7 +53,6 @@ void Chromosome::mutation(){
 }
 
 Chromosome* Chromosome::mutation(Problem* problem) {
-
     int MAX_TRIES = 10;
 
     std::uniform_int_distribution<int> examsDistribution(0, solution->exams->size() - 1);
@@ -93,13 +85,10 @@ Chromosome* Chromosome::mutation(Problem* problem) {
             swapped = true;
         }
     }
-
     return child;
-
 }
 
 void performStandardCrossover(Chromosome *firstParent, Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut){
-
     // Store genes pointer to clean code
     int *firstParentGenes = firstParent->solution->examsTimeslots;
     int *secondParentGenes = secondParent->solution->examsTimeslots;
@@ -122,11 +111,9 @@ void performStandardCrossover(Chromosome *firstParent, Chromosome *secondParent,
     // Perform mutation on children
     firstChild->mutation();
     secondChild->mutation();
-
 }
 
 void performOrderedCrossover(Chromosome *firstParent, Chromosome *secondParent, Chromosome *firstChild, Chromosome *secondChild, int minCut, int maxCut, bool *performingCrossover){
-
     std::unordered_map<int, bool> firstParentUsedGenes, secondParentUsedGenes;
 
     // Store genes pointer to clean code
@@ -185,11 +172,9 @@ void performOrderedCrossover(Chromosome *firstParent, Chromosome *secondParent, 
     // TODO: execute mutation with probability p(fitness)
     firstChild->mutation();
     secondChild->mutation();
-
 }
 
 Chromosome* Chromosome::crossover(Problem* problem, Chromosome *firstParent, Chromosome *secondParent) {
-
     std::uniform_int_distribution<int> timeslotDistribution(0, problem->timeslots - 1);
     int randomTimeslot = timeslotDistribution(generator);
 
@@ -223,7 +208,6 @@ Chromosome* Chromosome::crossover(Problem* problem, Chromosome *firstParent, Chr
                 firstChild->solution->moveExam(firstChild->solution->exams->at(exam), correspondentTimeslot_parent1);
         }
     }
-
     return firstChild;
 }
 
@@ -269,7 +253,6 @@ Chromosome* Chromosome::crossover(Problem* problem, Chromosome *firstParent, Chr
 } */
 
 Chromosome *Chromosome::inversion(Problem* problem) {
-
     // Random stuff
     std::uniform_int_distribution<int> cutDistribution(0, solution->exams->size() / 2 - 1);
 
@@ -287,11 +270,9 @@ Chromosome *Chromosome::inversion(Problem* problem) {
         std::swap(invertedChromosomeGenes[i], invertedChromosomeGenes[numberOfExams - 1 - i]);
 
     return invertedChromosome;
-
 }
 
 Chromosome *Chromosome::timeslot_inversion(Problem* problem) {
-
     // Random stuff
     std::uniform_int_distribution<int> cutDistribution(0, solution->timeslots - 1);
 
@@ -315,7 +296,6 @@ Chromosome *Chromosome::timeslot_inversion(Problem* problem) {
     }
 
     return invertedChromosome;
-
 }
 
 

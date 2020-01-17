@@ -11,7 +11,6 @@
 
 /*  Read the Exams file and return its content as a vector */
 std::vector<Exam*> readExams(std::string examsInstance){
-
     // Setting up exams dynamic vector
     std::vector<Exam*> exams;
 
@@ -33,12 +32,10 @@ std::vector<Exam*> readExams(std::string examsInstance){
     file.close();
 
     return exams;
-
 }
 
 /* Get conflicts from enrolled students */
 void retrieveConflicts(std::string studentsInstance, std::vector<Exam*> exams, int *students) {
-
     // File IO
     std::ifstream file;
     file.open(studentsInstance, std::ios_base::in);
@@ -77,12 +74,10 @@ void retrieveConflicts(std::string studentsInstance, std::vector<Exam*> exams, i
 
     // Close file
     file.close();
-
 }
 
 /*  Read the Timeslots file and return the number of timeslots  */
 int readTimeslots(std::string timeslotsInstance){
-
     int timeslots;
 
     // File IO
@@ -98,12 +93,10 @@ int readTimeslots(std::string timeslotsInstance){
     file.close();
 
     return timeslots;
-
 }
 
 /*  Main input function  */
 Problem* getProblemFromFile(std::string instance_name, int max_time) {
-
     auto* p = new Problem;
 
     p->instanceName = std::move(instance_name);
@@ -116,14 +109,12 @@ Problem* getProblemFromFile(std::string instance_name, int max_time) {
     retrieveConflicts(p->instanceName + ".stu", p->exams, &p->students);
 
     return p;
-
 }
 
 /*** OUTPUT ***/
 
 /*  Main output function  */
 void writeSolutionOnFile(Problem *p) {
-
     // File IO
     std::ofstream file;
     file.open(p->instanceName + "_DMOgroup03.sol");
@@ -136,5 +127,4 @@ void writeSolutionOnFile(Problem *p) {
     }
 
     file.close();
-
 }
